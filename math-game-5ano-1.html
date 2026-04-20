@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧮 Jogo de Matemática — 5º Ano</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --m1: #e63946; --m1l: #ffccd0; --m1d: #9b2226;
+    --m2: #f4a261; --m2l: #fde8d0; --m2d: #b5541a;
+    --m3: #2a9d8f; --m3l: #c8f0ec; --m3d: #1a6b61;
+    --m4: #7b2d8b; --m4l: #ead6f0; --m4d: #4a1a55;
+    --m5: #1d7fc4; --m5l: #cce5f7; --m5d: #0f4d7a;
+    --gold: #ffd166;
+    --dark: #1a1a2e;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #0f0f1a;
+    min-height: 100vh;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* Stars background */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(123,45,139,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(29,127,196,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 60% 80%, rgba(42,157,143,0.1) 0%, transparent 60%);
+  }
+  .star {
+    position: absolute; border-radius: 50%; background: white;
+    animation: twinkle ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: 0.1; transform: scale(1); } to { opacity: 0.8; transform: scale(1.3); } }
+
+  #app { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 16px; }
+
+  /* HEADER */
+  header {
+    text-align: center; margin-bottom: 20px;
+    animation: slideDown 0.7s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  header h1 {
+    font-family: 'Baloo 2', cursive; font-size: clamp(1.8rem, 5vw, 3rem);
+    background: linear-gradient(135deg, var(--gold), #ff9f1c, var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: none; letter-spacing: 1px;
+  }
+  header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; margin-top: 4px; }
+
+  /* SCORE BAR */
+  #scorebar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 12px 20px; margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+    animation: slideDown 0.8s cubic-bezier(.34,1.56,.64,1) 0.1s both;
+  }
+  .score-item { text-align: center; }
+  .score-item .lbl { font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+  .score-item .val { font-family: 'Baloo 2', cursive; font-size: 1.7rem; line-height: 1.1; }
+  #sv { color: var(--gold); }
+  #lv { color: var(--m1); }
+
+  /* PROGRESS */
+  #prog-wrap { background: rgba(255,255,255,0.08); border-radius: 30px; height: 10px; margin-bottom: 20px; overflow: hidden; }
+  #prog-bar { height: 100%; background: linear-gradient(90deg, var(--gold), #ff9f1c); border-radius: 30px; transition: width 0.5s ease; width: 0%; }
+
+  /* MODULE SELECT */
+  #module-select {
+    animation: fadeIn 0.6s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  #module-select h2 {
+    font-family: 'Baloo 2', cursive; font-size: 1.4rem; text-align: center;
+    margin-bottom: 16px; color: rgba(255,255,255,0.85);
+  }
+  .mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .mod-btn {
+    font-family: 'Baloo 2', cursive; font-size: 1rem;
+    padding: 18px 14px; border-radius: 18px; border: 2px solid transparent;
+    cursor: pointer; color: white; text-align: left;
+    transition: all 0.2s; position: relative; overflow: hidden;
+    line-height: 1.3;
+  }
+  .mod-btn::after { content: '→'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.6; transition: all 0.2s; }
+  .mod-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+  .mod-btn:hover::after { right: 10px; opacity: 1; }
+  .mod-btn .mn { font-size: 0.7rem; font-family: 'Nunito', sans-serif; opacity: 0.8; display: block; font-weight: 600; }
+  .m1b { background: linear-gradient(135deg, var(--m1d), var(--m1)); }
+  .m2b { background: linear-gradient(135deg, var(--m2d), var(--m2)); }
+  .m3b { background: linear-gradient(135deg, var(--m3d), var(--m3)); }
+  .m4b { background: linear-gradient(135deg, var(--m4d), var(--m4)); }
+  .m5b { background: linear-gradient(135deg, var(--m5d), var(--m5)); }
+  .all-btn {
+    width: 100%; font-family: 'Baloo 2', cursive; font-size: 1.1rem;
+    padding: 16px; border-radius: 18px; border: 2px solid var(--gold);
+    background: rgba(255,209,102,0.1); color: var(--gold); cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .all-btn:hover { background: rgba(255,209,102,0.2); transform: translateY(-2px); }
+
+  /* GAME CARD */
+  #game-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; padding: 28px 24px;
+    backdrop-filter: blur(12px);
+    min-height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: fadeIn 0.5s ease both;
+  }
+  #game-card.hidden { display: none; }
+
+  .mod-badge {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 30px; margin-bottom: 16px;
+    display: inline-block;
+  }
+
+  #question-text {
+    font-size: clamp(1rem, 2.5vw, 1.35rem); font-weight: 700;
+    text-align: center; color: white; margin-bottom: 6px; line-height: 1.5;
+    max-width: 560px;
+  }
+  #question-hint {
+    font-size: 0.85rem; color: rgba(255,255,255,0.5);
+    text-align: center; margin-bottom: 24px; font-style: italic;
+  }
+
+  /* OPTIONS */
+  #options {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; width: 100%; max-width: 540px;
+  }
+  .opt {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.95rem;
+    padding: 14px 12px; border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: white; cursor: pointer; text-align: center;
+    transition: all 0.15s; line-height: 1.3;
+  }
+  .opt:hover { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+  .opt.correct { background: rgba(6,214,160,0.2); border-color: #06d6a0; color: #06d6a0; transform: scale(1.03); }
+  .opt.wrong { background: rgba(230,57,70,0.2); border-color: var(--m1); color: #ff8085; }
+
+  #feedback {
+    margin-top: 18px; font-size: 1.1rem; font-weight: 800;
+    text-align: center; min-height: 28px;
+  }
+  .fb-ok { color: #06d6a0; }
+  .fb-no { color: #ff8085; }
+
+  #next-btn {
+    margin-top: 18px; font-family: 'Baloo 2', cursive; font-size: 1.1rem;
+    padding: 12px 36px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--gold), #ff9f1c);
+    color: #1a1a2e; cursor: pointer; font-weight: 800;
+    box-shadow: 0 6px 20px rgba(255,209,102,0.3);
+    transition: all 0.2s; display: none;
+  }
+  #next-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 10px 28px rgba(255,209,102,0.45); }
+
+  /* RESULTS */
+  #results {
+    display: none; flex-direction: column; align-items: center;
+    text-align: center; gap: 14px;
+  }
+  #results .big { font-size: 5rem; animation: bounce 1s ease infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  #results h2 { font-family: 'Baloo 2', cursive; font-size: 2.2rem; color: var(--gold); }
+  #results .fscore { font-family: 'Baloo 2', cursive; font-size: 3.5rem; color: white; }
+  #results p { color: rgba(255,255,255,0.7); font-size: 1rem; max-width: 380px; }
+  .stars-row { font-size: 2.5rem; letter-spacing: 6px; }
+
+  #restart-btn {
+    font-family: 'Baloo 2', cursive; font-size: 1.2rem;
+    padding: 14px 44px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--m1), var(--m2));
+    color: white; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(230,57,70,0.3);
+    transition: all 0.2s;
+  }
+  #restart-btn:hover { transform: translateY(-3px) scale(1.04); }
+  #menu-btn {
+    font-family: 'Baloo 2', cursive; font-size: 1rem;
+    padding: 12px 32px; border-radius: 50px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: transparent; color: rgba(255,255,255,0.7);
+    cursor: pointer; transition: all 0.2s;
+  }
+  #menu-btn:hover { border-color: rgba(255,255,255,0.5); color: white; }
+
+  /* Splash */
+  #splash { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  #splash .title-emoji { font-size: 3.5rem; }
+  #splash h2 { font-family: 'Baloo 2', cursive; font-size: 1.5rem; color: white; text-align: center; }
+  #splash p { font-size: 0.9rem; color: rgba(255,255,255,0.6); text-align: center; max-width: 400px; }
+  .rules { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 14px 18px; max-width: 420px; width: 100%; }
+  .rules li { font-size: 0.88rem; color: rgba(255,255,255,0.75); margin-bottom: 6px; list-style: none; padding-left: 20px; position: relative; }
+  .rules li::before { content: '✦'; position: absolute; left: 0; color: var(--gold); font-size: 0.75rem; top: 2px; }
+
+  @media (max-width: 480px) {
+    #options { grid-template-columns: 1fr; }
+    .mod-grid { grid-template-columns: 1fr; }
+    #game-card { padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div id="app">
+  <header>
+    <h1>🧮 Aventura Matemática</h1>
+    <p>5º Ano — Módulos 1 a 5</p>
+  </header>
+
+  <div id="scorebar">
+    <div class="score-item"><div class="lbl">⭐ Pontos</div><div class="val" id="sv">0</div></div>
+    <div class="score-item"><div class="lbl">📝 Questão</div><div class="val" id="qv">0/0</div></div>
+    <div class="score-item"><div class="lbl">❤️ Vidas</div><div class="val" id="lv">3</div></div>
+  </div>
+  <div id="prog-wrap"><div id="prog-bar"></div></div>
+
+  <div id="game-card">
+    <!-- SPLASH -->
+    <div id="splash">
+      <span class="title-emoji">🏆</span>
+      <h2>Bem-vindo ao Jogo de Matemática!</h2>
+      <p>Escolha um módulo para estudar ou jogue todos de uma vez. Você tem <strong>3 vidas ❤️</strong> e ganha 10 pontos por acerto!</p>
+      <ul class="rules">
+        <li>Módulo 1: Divisão de números naturais</li>
+        <li>Módulo 2: Decimais e medidas</li>
+        <li>Módulo 3: Sólidos geométricos</li>
+        <li>Módulo 4: Propriedades da igualdade</li>
+        <li>Módulo 5: Frações</li>
+      </ul>
+    </div>
+
+    <!-- MODULE SELECT -->
+    <div id="module-select" style="display:none; width:100%;">
+      <h2>Escolha o módulo:</h2>
+      <div class="mod-grid">
+        <button class="mod-btn m1b" onclick="startGame(1)">
+          <span class="mn">Módulo 1</span>Divisão de Números Naturais
+        </button>
+        <button class="mod-btn m2b" onclick="startGame(2)">
+          <span class="mn">Módulo 2</span>Decimais e Medidas
+        </button>
+        <button class="mod-btn m3b" onclick="startGame(3)">
+          <span class="mn">Módulo 3</span>Sólidos Geométricos
+        </button>
+        <button class="mod-btn m4b" onclick="startGame(4)">
+          <span class="mn">Módulo 4</span>Propriedades da Igualdade
+        </button>
+        <button class="mod-btn m5b" onclick="startGame(5)" style="grid-column: span 1;">
+          <span class="mn">Módulo 5</span>Frações
+        </button>
+        <button class="mod-btn" style="background:linear-gradient(135deg,#3a3a5c,#5a5a8c);" onclick="startGame(0)">
+          <span class="mn">🎯 Desafio</span>Todos os Módulos
+        </button>
+      </div>
+    </div>
+
+    <!-- QUESTION AREA -->
+    <div id="question-area" style="display:none; width:100%; flex-direction:column; align-items:center;">
+      <span id="mod-badge" class="mod-badge"></span>
+      <div id="question-text"></div>
+      <div id="question-hint"></div>
+      <div id="options"></div>
+      <div id="feedback"></div>
+      <button id="next-btn" onclick="nextQ()">Próxima ➡️</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results">
+      <span class="big" id="r-emoji">🏆</span>
+      <h2 id="r-title">Incrível!</h2>
+      <div class="fscore" id="r-score">0 pts</div>
+      <div class="stars-row" id="r-stars"></div>
+      <p id="r-msg"></p>
+      <button id="restart-btn" onclick="restartSame()">🔄 Jogar de novo</button>
+      <button id="menu-btn" onclick="showMenu()">🏠 Menu principal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STARS ─────────────────────────────────────────────────────
+(()=>{
+  const w = document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*3+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*4+2}s;animation-delay:${Math.random()*4}s;`;
+    w.appendChild(s);
+  }
+})();
+
+// ── QUESTION BANK ─────────────────────────────────────────────
+const Q = [
+  // ===== MÓDULO 1 — DIVISÃO =====
+  {m:1,q:'Qual é o quociente de 84 ÷ 4?',h:'Divida a dezena e a unidade separadamente',opts:['21','22','20','18'],a:'21'},
+  {m:1,q:'Na divisão 752 ÷ 50, qual é o RESTO?',h:'O quociente é 15...',opts:['2','5','10','0'],a:'2'},
+  {m:1,q:'348 ÷ 10 = ?  Qual é o quociente e o resto?',h:'Use estimativas: 10×10=100, 20×10=200...',opts:['Q=34, R=8','Q=35, R=0','Q=30, R=48','Q=34, R=0'],a:'Q=34, R=8'},
+  {m:1,q:'639 ÷ 3 pelo processo longo. Qual o resultado?',h:'Divida centenas, dezenas e unidades',opts:['213','219','203','231'],a:'213'},
+  {m:1,q:'A divisão 525 ÷ 5 é exata ou não exata?',h:'Uma divisão é exata quando o resto é zero',opts:['Exata (resto=0)','Não exata (resto=5)','Não exata (resto=3)','Exata (resto=5)'],a:'Exata (resto=0)'},
+  {m:1,q:'Na divisão 832 ÷ 6: qual é o quociente e o resto?',h:'6×100=600, 6×30=180, 6×8=48',opts:['Q=138, R=4','Q=140, R=2','Q=135, R=2','Q=138, R=6'],a:'Q=138, R=4'},
+  {m:1,q:'Qual é a IDEIA da divisão "quantos em cada grupo"?',h:'Você quer repartir igualmente',opts:['Repartição','Medição','Estimativa','Quociente'],a:'Repartição'},
+  {m:1,q:'Qual é a IDEIA da divisão "quantos grupos cabem"?',h:'Você quer descobrir quantos grupos se formam',opts:['Medição','Repartição','Divisão exata','Repertório'],a:'Medição'},
+  {m:1,q:'1487 ÷ 22 = ?',h:'22×60=1320, 22×7=154',opts:['Q=67, R=13','Q=65, R=17','Q=70, R=7','Q=67, R=3'],a:'Q=67, R=13'},
+  {m:1,q:'Daniela tem 34 dúzias de copos (34×12=408). Divide em embalagens de 24. Quantas embalagens?',h:'408 ÷ 24 = ?',opts:['17','18','16','20'],a:'17'},
+  {m:1,q:'486 ÷ 2 pelo processo longo. Resultado?',h:'C: 4÷2=2, D: 8÷2=4, U: 6÷2=3',opts:['243','244','242','246'],a:'243'},
+  {m:1,q:'516 ÷ 3 = ?',h:'C: 5÷3=1 R2, reagrupa. D: 21÷3=7, U: 6÷3=2',opts:['172','173','171','182'],a:'172'},
+
+  // ===== MÓDULO 2 — DECIMAIS E MEDIDAS =====
+  {m:2,q:'O número 3,125 tem parte inteira e parte decimal. Qual é a parte inteira?',h:'É o que vem ANTES da vírgula',opts:['3','125','31','0'],a:'3'},
+  {m:2,q:'Como se lê o número 12,40?',h:'Lembre: "inteiros e..." + nome da última ordem',opts:['Doze inteiros e quarenta centésimos','Doze inteiros e quatro décimos','Doze e quarenta','Doze mil e quarenta'],a:'Doze inteiros e quarenta centésimos'},
+  {m:2,q:'Quantos centésimos formam 1 décimo?',h:'0,01 cabe quantas vezes em 0,1?',opts:['10','100','1000','5'],a:'10'},
+  {m:2,q:'Como se escreve "cinco milésimos" em número?',h:'Milésimo = 3ª ordem decimal',opts:['0,005','0,05','0,5','5,000'],a:'0,005'},
+  {m:2,q:'Compare: 0,42 __ 0,402',h:'Olhe dígito por dígito da esquerda',opts:['>','<','=','Impossível comparar'],a:'>'},
+  {m:2,q:'Qual a escrita aditiva de 0,699?',h:'Decompõe em décimos + centésimos + milésimos',opts:['0,6+0,09+0,009','0,6+0,9+0,9','6+0,9+0,09','0,06+0,09+0,009'],a:'0,6+0,09+0,009'},
+  {m:2,q:'4,3 cm = ___ mm?',h:'1 cm = 10 mm',opts:['43 mm','4,3 mm','430 mm','0,43 mm'],a:'43 mm'},
+  {m:2,q:'Quantos gramas tem 2,5 kg?',h:'1 kg = 1000 g',opts:['2500 g','250 g','25000 g','2,5 g'],a:'2500 g'},
+  {m:2,q:'Qual é uma unidade de medida PADRONIZADA?',h:'Ela é igual em qualquer lugar do mundo',opts:['Quilograma (kg)','Colher de sopa','Xícara de café','Palmo'],a:'Quilograma (kg)'},
+  {m:2,q:'1000 mL = ?',h:'Unidade de capacidade',opts:['1 L','10 L','100 L','0,1 L'],a:'1 L'},
+  {m:2,q:'0,7 __ 0,700',h:'Zeros no final da parte decimal não mudam o valor',opts:['=','<','>','?'],a:'='},
+  {m:2,q:'Coloque em ordem crescente: 0,31 / 0,005 / 1,9 / 0,699',h:'Compare da esquerda para a direita',opts:['0,005 / 0,31 / 0,699 / 1,9','0,31 / 0,005 / 0,699 / 1,9','0,005 / 0,699 / 0,31 / 1,9','0,31 / 0,699 / 0,005 / 1,9'],a:'0,005 / 0,31 / 0,699 / 1,9'},
+  {m:2,q:'Uma maratona tem 42,195 km. Quantos metros?',h:'1 km = 1000 m',opts:['42195 m','4219,5 m','421,95 m','421950 m'],a:'42195 m'},
+
+  // ===== MÓDULO 3 — SÓLIDOS GEOMÉTRICOS =====
+  {m:3,q:'Quais são os 3 elementos de um POLIEDRO?',h:'São as partes que compõem a estrutura do sólido',opts:['Faces, arestas e vértices','Faces, lados e ângulos','Bordas, cantos e superfícies','Polígonos, linhas e pontos'],a:'Faces, arestas e vértices'},
+  {m:3,q:'Um PRISMA de base triangular tem quantas faces?',h:'2 bases + faces laterais',opts:['5','6','4','7'],a:'5'},
+  {m:3,q:'Uma PIRÂMIDE de base quadrada tem quantas faces?',h:'1 base + faces triangulares laterais',opts:['5','4','6','8'],a:'5'},
+  {m:3,q:'O CUBO tem quantas faces? Qual o formato?',h:'É um prisma especial',opts:['6 faces quadradas','4 faces quadradas','6 faces retangulares','8 faces triangulares'],a:'6 faces quadradas'},
+  {m:3,q:'Esfera, Cone e Cilindro pertencem a qual grupo?',h:'Eles têm superfícies curvas',opts:['Não poliedros / Corpos redondos','Poliedros','Prismas','Pirâmides'],a:'Não poliedros / Corpos redondos'},
+  {m:3,q:'O que é a PLANIFICAÇÃO de um sólido?',h:'É quando "abrimos" o sólido',opts:['O sólido "aberto e achatado" em superfície plana','O desenho em perspectiva do sólido','O nome das faces do sólido','A contagem de vértices'],a:'O sólido "aberto e achatado" em superfície plana'},
+  {m:3,q:'Um PRISMA de base hexagonal tem quantas arestas?',h:'Arestas = lados da base × 3',opts:['18','12','15','24'],a:'18'},
+  {m:3,q:'Qual a diferença entre PIRÂMIDE e PRISMA?',h:'Pense nas bases e faces laterais',opts:['Pirâmide: 1 base + faces triangulares; Prisma: 2 bases + faces retangulares','Pirâmide: 2 bases; Prisma: 1 base','Pirâmide tem faces retangulares; Prisma tem triangulares','São iguais'],a:'Pirâmide: 1 base + faces triangulares; Prisma: 2 bases + faces retangulares'},
+  {m:3,q:'Uma planificação com 2 círculos + 1 retângulo forma qual sólido?',h:'Corpos redondos têm bases circulares',opts:['Cilindro','Cone','Esfera','Prisma'],a:'Cilindro'},
+  {m:3,q:'Uma planificação com 1 quadrado + 4 triângulos forma qual sólido?',h:'Bases polígono + faces triangulares = ?',opts:['Pirâmide de base quadrada','Cubo','Prisma quadrangular','Tetraedro'],a:'Pirâmide de base quadrada'},
+  {m:3,q:'O CONE tem quantos vértices e qual tipo de base?',h:'Corpos redondos têm superfícies curvas',opts:['1 vértice e 1 base circular','2 vértices e 2 bases circulares','Nenhum vértice','1 vértice e 1 base quadrada'],a:'1 vértice e 1 base circular'},
+  {m:3,q:'Qual a diferença entre CÍRCULO e CIRCUNFERÊNCIA?',h:'Um é a área, o outro é apenas a linha',opts:['Círculo = área interna + borda; Circunferência = só a linha de contorno','São a mesma coisa','Círculo = só a linha; Circunferência = área interna','Círculo é 3D; Circunferência é 2D'],a:'Círculo = área interna + borda; Circunferência = só a linha de contorno'},
+  {m:3,q:'Prisma de base pentagonal: quantos vértices?',h:'Vértices = lados da base × 2',opts:['10','8','12','15'],a:'10'},
+
+  // ===== MÓDULO 4 — PROPRIEDADES DA IGUALDADE =====
+  {m:4,q:'3 × 12 + 4 = 36 + 4. Esta igualdade é verdadeira ou falsa?',h:'Calcule os dois lados',opts:['Verdadeira (40 = 40)','Falsa (36 ≠ 40)','Verdadeira (36 = 36)','Falsa (40 ≠ 36)'],a:'Verdadeira (40 = 40)'},
+  {m:4,q:'3 × 12 + 10 = 36 − 10. Esta igualdade é verdadeira ou falsa?',h:'Calcule: 36+10=46 e 36-10=26',opts:['Falsa (46 ≠ 26)','Verdadeira','Falsa (36 ≠ 46)','Verdadeira (26=26)'],a:'Falsa (46 ≠ 26)'},
+  {m:4,q:'Quando uma igualdade NÃO se altera?',h:'A grande regra da igualdade',opts:['Quando a mesma operação é feita nos DOIS membros','Quando se opera apenas no 1º membro','Quando se multiplica um membro e divide o outro','Nunca se altera'],a:'Quando a mesma operação é feita nos DOIS membros'},
+  {m:4,q:'Complete: 10 × 6 − 4 = 60 ___',h:'O que foi feito no 1º membro deve ir no 2º',opts:['− 4','+ 4','× 4','÷ 4'],a:'− 4'},
+  {m:4,q:'Complete: 6 × 15 ÷ 2 = 90 ___',h:'6×15=90. O que foi feito depois?',opts:['÷ 2','× 2','− 2','+ 2'],a:'÷ 2'},
+  {m:4,q:'2 × 24 ÷ 4 = 48 ÷ 4. Esta igualdade é verdadeira ou falsa?',h:'2×24=48. Depois dividiu por 4 dos dois lados',opts:['Verdadeira (12=12)','Falsa','Verdadeira (48=48)','Falsa (12≠48)'],a:'Verdadeira (12=12)'},
+  {m:4,q:'O que significa o sinal = em "12+23 = 15+20"?',h:'O = pode indicar resultado ou equivalência',opts:['Indica igualdade: os dois lados têm o mesmo valor','Indica resultado','Indica multiplicação','Indica subtração'],a:'Indica igualdade: os dois lados têm o mesmo valor'},
+  {m:4,q:'4 × 25 ÷ 2 = 100 × 2. Esta igualdade é verdadeira ou falsa?',h:'4×25=100. Depois dividiu de um lado e multiplicou do outro',opts:['Falsa (50 ≠ 200)','Verdadeira','Falsa (100 ≠ 200)','Verdadeira (200=200)'],a:'Falsa (50 ≠ 200)'},
+  {m:4,q:'Complete: 8 × 9 × 2 = 72 ___',h:'8×9=72. O que veio depois?',opts:['× 2','+ 2','− 2','÷ 2'],a:'× 2'},
+  {m:4,q:'10 × 3 − 20 = 30 − 20. Verdadeira ou falsa?',h:'10×3=30. Subtraiu 20 dos dois lados.',opts:['Verdadeira (10=10)','Falsa','Verdadeira (30=30)','Falsa (10≠30)'],a:'Verdadeira (10=10)'},
+  {m:4,q:'Complete: 23 + 8 × ___ = 23 + 80',h:'Quanto é 8 × algo = 80?',opts:['10','8','80','9'],a:'10'},
+  {m:4,q:'63 ÷ 9 ÷ 7 = 7 ÷ 7. Verdadeira ou falsa?',h:'63÷9=7. Depois dividiu por 7 nos dois lados',opts:['Verdadeira (1=1)','Falsa','Verdadeira (7=7)','Falsa (1≠7)'],a:'Verdadeira (1=1)'},
+
+  // ===== MÓDULO 5 — FRAÇÕES =====
+  {m:5,q:'Na fração 3/8, o denominador é:',h:'O denominador fica EMBAIXO do traço',opts:['8','3','38','⅜'],a:'8'},
+  {m:5,q:'O denominador indica:',h:'Ele mostra como o todo foi dividido',opts:['Em quantas partes iguais o todo foi dividido','Quantas partes foram consideradas','O valor total','O número inteiro'],a:'Em quantas partes iguais o todo foi dividido'},
+  {m:5,q:'Como se lê 2/5?',h:'Dois... o denominador indica o nome',opts:['Dois quintos','Dois quintas','Dois fração cinco','Dois meios'],a:'Dois quintos'},
+  {m:5,q:'1/4 de 20 lápis = ?',h:'Divida 20 pelo denominador: 20÷4=5',opts:['5','4','10','8'],a:'5'},
+  {m:5,q:'4/5 de 20 lápis = ?',h:'1/5 de 20 = 4. Então 4/5 = 4 × 4',opts:['16','15','18','12'],a:'16'},
+  {m:5,q:'1/10 de 600 pessoas = ?',h:'600 ÷ 10 = ?',opts:['60','6','600','160'],a:'60'},
+  {m:5,q:'Fração decimal 1/10 = qual número decimal?',h:'Um décimo em decimal',opts:['0,1','0,01','0,001','1,0'],a:'0,1'},
+  {m:5,q:'Fração decimal 1/100 = qual número decimal?',h:'Um centésimo em decimal',opts:['0,01','0,1','0,001','1,00'],a:'0,01'},
+  {m:5,q:'1/2 e 5/10 representam:',h:'Compare as partes em relação ao todo',opts:['A mesma parte (são equivalentes)','Partes diferentes','1/2 é maior','5/10 é maior'],a:'A mesma parte (são equivalentes)'},
+  {m:5,q:'0,45 em fração = ?',h:'0,45 = 45 centésimos',opts:['45/100','45/10','4/5','45/1000'],a:'45/100'},
+  {m:5,q:'7/10 da prova com 50 questões = quantas questões?',h:'1/10 de 50 = 5. Então 7/10 = ?',opts:['35','7','50','45'],a:'35'},
+  {m:5,q:'Como se lê 1/11?',h:'Denominador maior que 10 → usa "avos"',opts:['Um onze avos','Um undécimo','Um e onze','Onze inteiros'],a:'Um onze avos'},
+  {m:5,q:'3/4 de 20 = ?',h:'1/4 de 20 = 5. Então 3/4 = ?',opts:['15','12','18','10'],a:'15'},
+  {m:5,q:'Na reta numérica, 5/10 fica:',h:'5/10 = metade',opts:['Exatamente no meio entre 0 e 1','No começo (perto do 0)','No final (perto do 1)','Além do 1'],a:'Exatamente no meio entre 0 e 1'},
+  {m:5,q:'Pedro ficou com 1/4 de 40 carrinhos. Paulo ficou com 2/8 de 40. Quem ficou com mais?',h:'1/4 = 2/8 (frações equivalentes!)',opts:['Ficaram com a mesma quantidade','Pedro ficou com mais','Paulo ficou com mais','Impossível saber'],a:'Ficaram com a mesma quantidade'},
+];
+
+// Module colors
+const MCOLOR = {1:['#e63946','#ffccd0'],2:['#f4a261','#fde8d0'],3:['#2a9d8f','#c8f0ec'],4:['#7b2d8b','#ead6f0'],5:['#1d7fc4','#cce5f7']};
+const MNAME = {1:'Módulo 1 — Divisão',2:'Módulo 2 — Decimais',3:'Módulo 3 — Sólidos',4:'Módulo 4 — Igualdade',5:'Módulo 5 — Frações'};
+
+// State
+let pool=[], idx=0, score=0, lives=3, answered=false, curMod=0;
+
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5);}
+
+function showSplash(){
+  document.getElementById('splash').style.display='flex';
+  document.getElementById('module-select').style.display='none';
+  document.getElementById('question-area').style.display='none';
+  document.getElementById('results').style.display='none';
+}
+
+function showMenu(){
+  document.getElementById('splash').style.display='none';
+  document.getElementById('module-select').style.display='block';
+  document.getElementById('question-area').style.display='none';
+  document.getElementById('results').style.display='none';
+  updateBar();
+}
+
+// Called from splash button
+document.addEventListener('DOMContentLoaded',()=>{
+  // Add "Jogar" button to splash
+  const btn=document.createElement('button');
+  btn.className='all-btn';btn.textContent='🚀 Escolher módulo!';
+  btn.onclick=showMenu;
+  document.getElementById('splash').appendChild(btn);
+});
+
+function startGame(mod){
+  curMod=mod;
+  pool = mod===0 ? shuffle(Q) : shuffle(Q.filter(q=>q.m===mod));
+  idx=0;score=0;lives=3;answered=false;
+  document.getElementById('splash').style.display='none';
+  document.getElementById('module-select').style.display='none';
+  document.getElementById('results').style.display='none';
+  document.getElementById('question-area').style.display='flex';
+  updateBar();
+  showQ();
+}
+
+function restartSame(){startGame(curMod);}
+
+function updateBar(){
+  document.getElementById('sv').textContent=score;
+  document.getElementById('lv').textContent='❤️'.repeat(Math.max(lives,0))||'💀';
+  document.getElementById('qv').textContent=`${idx}/${pool.length}`;
+  document.getElementById('prog-bar').style.width=(pool.length>0?(idx/pool.length*100):0)+'%';
+}
+
+function showQ(){
+  if(idx>=pool.length||lives<=0){showResults();return;}
+  const q=pool[idx];answered=false;
+  const mc=MCOLOR[q.m]||['#888','#eee'];
+
+  const badge=document.getElementById('mod-badge');
+  badge.textContent=MNAME[q.m]||'Questão';
+  badge.style.background=mc[1];badge.style.color=mc[0];
+
+  document.getElementById('question-text').textContent=q.q;
+  document.getElementById('question-hint').textContent='💡 Dica: '+q.h;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='';
+  document.getElementById('next-btn').style.display='none';
+
+  const opts=document.getElementById('options');
+  opts.innerHTML='';
+  const shuffled=shuffle(q.opts);
+  shuffled.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt';b.textContent=o;
+    b.onclick=()=>check(b,o,q.a,q.m);
+    opts.appendChild(b);
+  });
+  updateBar();
+}
+
+function check(btn,chosen,ans,m){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.opt').forEach(b=>b.style.pointerEvents='none');
+  const mc=MCOLOR[m]||['#888','#eee'];
+  if(chosen===ans){
+    btn.classList.add('correct');score+=10;
+    document.getElementById('feedback').textContent=randomOk();
+    document.getElementById('feedback').className='fb-ok';
+  } else {
+    btn.classList.add('wrong');lives=Math.max(0,lives-1);
+    document.getElementById('feedback').textContent='❌ Correto: "'+ans+'"';
+    document.getElementById('feedback').className='fb-no';
+    document.querySelectorAll('.opt').forEach(b=>{if(b.textContent===ans)b.classList.add('correct');});
+  }
+  idx++;updateBar();
+  document.getElementById('next-btn').style.display='block';
+}
+
+function nextQ(){if(lives<=0){showResults();}else{showQ();}}
+
+function randomOk(){
+  const msgs=['✅ Correto! Muito bem!','⭐ Excelente!','🔥 Arrasou!','💪 Perfeito!','🌟 Brilhante!','🎯 Acertou!'];
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+function showResults(){
+  document.getElementById('question-area').style.display='none';
+  const r=document.getElementById('results');r.style.display='flex';
+  const total=pool.length*10, pct=score/total;
+  let emoji,title,msg,stars;
+  if(pct>=0.9){emoji='🏆';title='INCRÍVEL!';msg='Você é um mestre da matemática! 🎉';stars='⭐⭐⭐';}
+  else if(pct>=0.7){emoji='🎉';title='Muito bem!';msg='Ótimo resultado! Continue praticando! 💪';stars='⭐⭐';}
+  else if(pct>=0.5){emoji='😊';title='Bom trabalho!';msg='Você está aprendendo! Tente de novo para melhorar!';stars='⭐';}
+  else{emoji='📚';title='Continue estudando!';msg='Revise o resumo e tente de novo, você consegue!';stars='';}
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-title').textContent=title;
+  document.getElementById('r-score').textContent=score+' pts';
+  document.getElementById('r-msg').textContent=msg;
+  document.getElementById('r-stars').textContent=stars;
+  document.getElementById('prog-bar').style.width='100%';
+}
+</script>
+</body>
+</html>
