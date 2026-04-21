@@ -493,7 +493,28 @@ body {
   font-weight: 700;
   font-size: 0.9em;
 }
-.stat-pill span { color: var(--gold); font-size: 1.2em; display: block; }
+
+.module-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 1em;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+  animation: badgePop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+}
+@keyframes badgePop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.module-badge.mod1 { background: linear-gradient(135deg,#ff6f00,#ffa726); color: #fff; }
+.module-badge.mod2 { background: linear-gradient(135deg,#00796b,#26a69a); color: #fff; }
+.module-badge.mod3 { background: linear-gradient(135deg,#6a1b9a,#ab47bc); color: #fff; }
+.module-badge.all  { background: linear-gradient(135deg,#1565c0,#42a5f5); color: #fff; }
 
 .result-msg {
   font-size: 1em;
@@ -526,6 +547,43 @@ body {
   color: var(--white); cursor: pointer; transition: all 0.25s;
 }
 .btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+
+.btn-share {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  border: none; border-radius: 14px; padding: 12px 28px;
+  font-family: 'Baloo 2', cursive; font-size: 1em; font-weight: 800;
+  color: white; cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 6px 20px rgba(37,211,102,0.3);
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-share:hover { transform: scale(1.05); box-shadow: 0 10px 28px rgba(37,211,102,0.45); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(30,27,75,0.97);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95em;
+  font-weight: 700;
+  color: var(--white);
+  z-index: 9999;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
+  opacity: 0;
+  white-space: nowrap;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.toast.success { border-color: rgba(0,230,118,0.4); }
+.toast.info { border-color: rgba(64,196,255,0.4); }
 
 /* CONFETTI */
 .confetti-piece {
@@ -679,12 +737,16 @@ body {
     <div class="stat-pill">Erros <span id="finalWrong">0</span></div>
     <div class="stat-pill">Combo máx <span id="finalCombo">0</span></div>
   </div>
+  <div id="moduleBadge" class="module-badge all">🎯 Todos os Módulos</div>
   <div class="result-msg" id="resultMsg"></div>
   <div class="btn-row">
     <button class="btn-primary" onclick="startGame(lastMode)">🔄 Jogar de Novo</button>
+    <button class="btn-share" onclick="shareResult()">📤 Compartilhar</button>
     <button class="btn-secondary" onclick="showHome()">🏠 Início</button>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 // ===== QUESTIONS DATABASE =====
@@ -1135,6 +1197,18 @@ function showResult() {
   document.getElementById('finalCombo').textContent = maxCombo;
   document.getElementById('resultMsg').textContent = msg;
 
+  // Module badge
+  const modeLabels = {
+    mod1: { icon: '😂', label: 'Módulo 1 – Piada & Dicionário' },
+    mod2: { icon: '🐛', label: 'Módulo 2 – Narrativa de Humor' },
+    mod3: { icon: '⭐', label: 'Módulo 3 – Resenha Crítica' },
+    all:  { icon: '🎯', label: 'Todos os Módulos' },
+  };
+  const mb = document.getElementById('moduleBadge');
+  const ml = modeLabels[lastMode] || modeLabels.all;
+  mb.className = `module-badge ${lastMode}`;
+  mb.textContent = `${ml.icon}  ${ml.label}`;
+
   // Stars
   const stars = document.querySelectorAll('.star');
   const starsCount = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
@@ -1181,6 +1255,394 @@ function showHome() {
   const hs = parseInt(localStorage.getItem('ptHS') || '0');
   document.getElementById('highScoreVal').textContent = hs;
   showScreen('home');
+}
+
+function shareResult() {
+  const canvas = document.createElement('canvas');
+  const W = 640, H = 760;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const pct = Math.round((correct / currentQuestions.length) * 100);
+  const starsCount = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
+  const modeName = lastMode === 'all' ? 'Todos os Módulos' :
+                   lastMode === 'mod1' ? 'Módulo 1 – Piada & Dicionário' :
+                   lastMode === 'mod2' ? 'Módulo 2 – Narrativa de Humor' :
+                   'Módulo 3 – Resenha Crítica';
+
+  // --- Background gradient ---
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0,   '#0f0c29');
+  bgGrad.addColorStop(0.5, '#1a1a4e');
+  bgGrad.addColorStop(1,   '#0f0c29');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // --- Decorative circles ---
+  const drawCircle = (x, y, r, color) => {
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  };
+  drawCircle(80,  80,  140, '#ffd700');
+  drawCircle(580, 120, 100, '#ce93d8');
+  drawCircle(60,  680, 120, '#40c4ff');
+  drawCircle(600, 650, 160, '#ff6b35');
+
+  // --- Stars sprinkled ---
+  ctx.save();
+  ctx.fillStyle = 'white';
+  const starDots = [[50,180],[590,300],[120,400],[500,480],[320,60],[30,520],[620,200]];
+  starDots.forEach(([sx,sy]) => {
+    ctx.globalAlpha = Math.random() * 0.5 + 0.2;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+
+  // --- Card background ---
+  const cardX = 40, cardY = 30, cardW = W - 80, cardH = H - 60, cardR = 32;
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#1e1b4b';
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.fill();
+  ctx.restore();
+
+  // Card border gradient
+  ctx.save();
+  const borderGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+  borderGrad.addColorStop(0, '#ffd700');
+  borderGrad.addColorStop(0.5, '#ce93d8');
+  borderGrad.addColorStop(1, '#40c4ff');
+  ctx.strokeStyle = borderGrad;
+  ctx.lineWidth = 2.5;
+  ctx.globalAlpha = 0.6;
+  roundRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.stroke();
+  ctx.restore();
+
+  // --- Top banner ---
+  const bannerGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + 80);
+  bannerGrad.addColorStop(0, '#7c3aed');
+  bannerGrad.addColorStop(1, '#2563eb');
+  ctx.save();
+  ctx.fillStyle = bannerGrad;
+  roundRectTop(ctx, cardX, cardY, cardW, 80, cardR);
+  ctx.fill();
+  ctx.restore();
+
+  // Banner text
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.textAlign = 'center';
+  ctx.fillText('🎮 Aventura do Português', W / 2, cardY + 35);
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = 'rgba(200,200,255,0.85)';
+  ctx.fillText('5º Ano  •  Língua Portuguesa', W / 2, cardY + 58);
+
+  // --- Trophy + title ---
+  ctx.font = '64px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(pct >= 90 ? '🏆' : pct >= 70 ? '🥇' : pct >= 50 ? '🥈' : '📚', W / 2, 210);
+
+  const titleText = pct >= 90 ? 'Incrível! Você arrasou!' :
+                    pct >= 70 ? 'Muito bem!' :
+                    pct >= 50 ? 'Bom esforço!' : 'Continue tentando!';
+  ctx.font = 'bold 30px sans-serif';
+  const titleGrad = ctx.createLinearGradient(160, 0, 480, 0);
+  titleGrad.addColorStop(0, '#ffd700');
+  titleGrad.addColorStop(1, '#ffab40');
+  ctx.fillStyle = titleGrad;
+  ctx.fillText(titleText, W / 2, 258);
+
+  // --- Stars row ---
+  ctx.font = '38px serif';
+  ctx.textAlign = 'center';
+  const starSpacing = 52;
+  const starStartX = W / 2 - starSpacing;
+  for (let i = 0; i < 3; i++) {
+    ctx.fillStyle = i < starsCount ? '#ffd700' : 'rgba(255,255,255,0.2)';
+    ctx.font = '38px serif';
+    ctx.fillText(i < starsCount ? '⭐' : '☆', starStartX + i * starSpacing, 308);
+  }
+
+  // --- Divider ---
+  ctx.save();
+  const divGrad = ctx.createLinearGradient(80, 330, W - 80, 330);
+  divGrad.addColorStop(0, 'transparent');
+  divGrad.addColorStop(0.3, 'rgba(255,215,0,0.4)');
+  divGrad.addColorStop(0.7, 'rgba(255,215,0,0.4)');
+  divGrad.addColorStop(1, 'transparent');
+  ctx.strokeStyle = divGrad;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, 330); ctx.lineTo(W - 80, 330);
+  ctx.stroke();
+  ctx.restore();
+
+  // --- Score big ---
+  ctx.font = 'bold 72px sans-serif';
+  const scoreGrad = ctx.createLinearGradient(200, 360, 440, 440);
+  scoreGrad.addColorStop(0, '#ffd700');
+  scoreGrad.addColorStop(1, '#ffab40');
+  ctx.fillStyle = scoreGrad;
+  ctx.textAlign = 'center';
+  ctx.fillText(score, W / 2, 420);
+
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = 'rgba(150,160,220,0.9)';
+  ctx.fillText('PONTOS CONQUISTADOS', W / 2, 448);
+
+  // --- Stats pills ---
+  const pills = [
+    { label: 'Acertos', val: correct, color: '#00e676', icon: '✅' },
+    { label: 'Erros',   val: wrong,   color: '#ff5252', icon: '❌' },
+    { label: 'Combo',   val: maxCombo + 'x', color: '#ffd700', icon: '🔥' },
+  ];
+  const pillW = 140, pillH = 72, pillGap = 18;
+  const pillStartX = (W - (pillW * 3 + pillGap * 2)) / 2;
+  pills.forEach((p, i) => {
+    const px = pillStartX + i * (pillW + pillGap);
+    const py = 472;
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = p.color;
+    roundRect(ctx, px, py, pillW, pillH, 16);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = p.color;
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, px, py, pillW, pillH, 16);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = '22px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.icon, px + pillW / 2, py + 26);
+
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.val, px + pillW / 2, py + 52);
+  });
+
+  // --- Divider 2 ---
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, 568); ctx.lineTo(W - 80, 568);
+  ctx.stroke();
+  ctx.restore();
+
+  // --- Module tag ---
+  ctx.font = '14px sans-serif';
+  ctx.fillStyle = 'rgba(130,150,230,0.9)';
+  ctx.textAlign = 'center';
+  ctx.fillText('📚  ' + modeName, W / 2, 598);
+
+  // --- Progress bar ---
+  const barX = 100, barY = 618, barW = W - 200, barH = 12, barR = 6;
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = 'white';
+  roundRect(ctx, barX, barY, barW, barH, barR);
+  ctx.fill();
+  ctx.restore();
+
+  const fillW = (pct / 100) * barW;
+  const barFillGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+  barFillGrad.addColorStop(0, '#40c4ff');
+  barFillGrad.addColorStop(1, '#ce93d8');
+  ctx.fillStyle = barFillGrad;
+  roundRect(ctx, barX, barY, fillW, barH, barR);
+  ctx.fill();
+
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillStyle = 'rgba(200,210,255,0.8)';
+  ctx.textAlign = 'center';
+  ctx.fillText(pct + '% de acertos', W / 2, barY + barH + 22);
+
+  // --- Bottom footer ---
+  ctx.save();
+  const footGrad = ctx.createLinearGradient(cardX, H - 100, cardX + cardW, H - 30);
+  footGrad.addColorStop(0, 'rgba(255,215,0,0.06)');
+  footGrad.addColorStop(1, 'rgba(206,147,216,0.06)');
+  ctx.fillStyle = footGrad;
+  roundRectBottom(ctx, cardX, H - 90, cardW, 60, cardR);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillStyle = 'rgba(255,215,0,0.75)';
+  ctx.textAlign = 'center';
+  ctx.fillText('🎮 Aventura do Português  •  5º Ano', W / 2, H - 52);
+  ctx.font = '13px sans-serif';
+  ctx.fillStyle = 'rgba(150,160,220,0.6)';
+  ctx.fillText('Venha estudar também! 📖', W / 2, H - 32);
+
+  // --- Convert & show preview modal ---
+  const dataURL = canvas.toDataURL('image/png');
+  showImageModal(dataURL, canvas);
+}
+
+function showImageModal(dataURL, canvas) {
+  // Remove modal anterior se existir
+  const old = document.getElementById('shareModal');
+  if (old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'shareModal';
+  modal.style.cssText = `
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.85);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:16px; padding:20px;
+    animation: fadeIn .3s ease;
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `@keyframes fadeIn { from{opacity:0} to{opacity:1} }`;
+  modal.appendChild(style);
+
+  const title = document.createElement('div');
+  title.textContent = '🖼️ Sua imagem está pronta!';
+  title.style.cssText = `font-family:'Baloo 2',cursive; font-size:1.3em; font-weight:800; color:#ffd700;`;
+  modal.appendChild(title);
+
+  const hint = document.createElement('div');
+  hint.textContent = 'Pressione e segure a imagem para salvar ou use o botão abaixo 👇';
+  hint.style.cssText = `font-size:0.82em; color:rgba(150,160,220,0.9); font-weight:700; text-align:center; max-width:340px;`;
+  modal.appendChild(hint);
+
+  const img = document.createElement('img');
+  img.src = dataURL;
+  img.style.cssText = `
+    max-width: min(560px, 90vw);
+    max-height: 55vh;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    object-fit: contain;
+  `;
+  modal.appendChild(img);
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = `display:flex; gap:12px; flex-wrap:wrap; justify-content:center;`;
+
+  // Botão Download
+  const dlBtn = document.createElement('a');
+  dlBtn.href = dataURL;
+  dlBtn.download = 'resultado-portugues.png';
+  dlBtn.textContent = '⬇️ Baixar imagem';
+  dlBtn.style.cssText = `
+    background: linear-gradient(135deg,#ffd700,#ffab40);
+    border:none; border-radius:12px; padding:12px 24px;
+    font-family:'Baloo 2',cursive; font-size:1em; font-weight:800;
+    color:#0f0c29; cursor:pointer; text-decoration:none;
+    box-shadow:0 4px 16px rgba(255,170,0,0.35);
+    transition: transform .2s;
+  `;
+  dlBtn.onmouseover = () => dlBtn.style.transform = 'scale(1.05)';
+  dlBtn.onmouseout  = () => dlBtn.style.transform = 'scale(1)';
+  dlBtn.onclick = () => showToast('🖼️ Download iniciado!', 'success');
+  btnRow.appendChild(dlBtn);
+
+  // Botão Compartilhar nativo (mobile)
+  if (navigator.canShare) {
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      const file = new File([blob], 'resultado-portugues.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        const shareBtn = document.createElement('button');
+        shareBtn.textContent = '📤 Compartilhar';
+        shareBtn.style.cssText = `
+          background:linear-gradient(135deg,#25d366,#128c7e);
+          border:none; border-radius:12px; padding:12px 24px;
+          font-family:'Baloo 2',cursive; font-size:1em; font-weight:800;
+          color:white; cursor:pointer;
+          box-shadow:0 4px 16px rgba(37,211,102,0.3);
+        `;
+        shareBtn.onclick = () => {
+          navigator.share({ files: [file], title: 'Meu resultado – Aventura do Português' })
+            .then(() => showToast('✅ Compartilhado!', 'success'))
+            .catch(() => {});
+        };
+        btnRow.appendChild(shareBtn);
+      }
+    }, 'image/png');
+  }
+
+  // Botão Fechar
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Fechar';
+  closeBtn.style.cssText = `
+    background:rgba(255,255,255,0.08);
+    border:1.5px solid rgba(255,255,255,0.2); border-radius:12px; padding:12px 24px;
+    font-family:'Baloo 2',cursive; font-size:1em; font-weight:700;
+    color:white; cursor:pointer;
+  `;
+  closeBtn.onclick = () => modal.remove();
+  btnRow.appendChild(closeBtn);
+
+  modal.appendChild(btnRow);
+
+  // Fecha clicando fora da imagem
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  document.body.appendChild(modal);
+}
+
+// Helpers para canvas rounded rects
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+function roundRectTop(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+function roundRectBottom(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y);
+  ctx.closePath();
+}
+
+function showToast(msg, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => { toast.className = `toast ${type}`; }, 3000);
 }
 
 // Init
