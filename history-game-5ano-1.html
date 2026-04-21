@@ -1,428 +1,577 @@
-
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏛️ Aventura na História – 5º Ano</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary)}
-#game{padding:1rem 0;min-height:500px}
-.screen{display:none}.screen.active{display:block}
-.hud{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
-.hud-box{background:var(--color-background-secondary);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--color-text-secondary)}
-.hud-box span{color:var(--color-text-primary);font-weight:500}
-.lives{display:flex;gap:4px;align-items:center}
-.heart{color:#E24B4A;font-size:16px}
-.heart.empty{opacity:0.25}
-.arena{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;padding:1.5rem;margin-bottom:12px}
-.phase-badge{display:inline-block;background:#E1F5EE;color:#085041;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:12px}
-.question{font-size:16px;font-weight:500;color:var(--color-text-primary);line-height:1.5;margin-bottom:18px}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.opt-btn{padding:12px 14px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:background 0.12s,border-color 0.12s;line-height:1.4}
-.opt-btn:hover:not(:disabled){background:var(--color-background-secondary);border-color:var(--color-border-primary)}
-.opt-btn.correct{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:500}
-.opt-btn.wrong{background:#FCEBEB;border-color:#E24B4A;color:#791F1F}
-.opt-btn:disabled{cursor:default}
-.feedback-bar{border-radius:10px;padding:10px 14px;font-size:13px;margin-top:10px;display:none}
-.feedback-bar.show{display:block}
-.feedback-bar.ok{background:#E1F5EE;color:#085041}
-.feedback-bar.err{background:#FCEBEB;color:#791F1F}
-.timer-bar{height:6px;background:var(--color-border-tertiary);border-radius:3px;margin-bottom:14px;overflow:hidden}
-.timer-fill{height:100%;border-radius:3px;background:#1D9E75;transition:width 0.1s linear}
-.timer-fill.warning{background:#EF9F27}
-.timer-fill.danger{background:#E24B4A}
-.next-btn{margin-top:14px;padding:10px 28px;border-radius:20px;border:none;background:#1D9E75;color:#fff;font-size:14px;font-weight:500;cursor:pointer;display:none}
-.next-btn.show{display:inline-block}
-.bonus-tag{display:inline-block;background:#FAEEDA;color:#633806;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;font-weight:500}
-.home-title{font-size:26px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;margin-top:1rem}
-.home-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem;line-height:1.6}
-.phase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:1.5rem}
-.phase-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color 0.15s}
-.phase-card:hover{border-color:var(--color-border-primary)}
-.phase-card.locked{opacity:0.45;cursor:not-allowed}
-.phase-card.completed{border-color:#1D9E75}
-.phase-icon{font-size:24px;margin-bottom:6px}
-.phase-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
-.phase-info{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
-.start-btn{padding:12px 32px;border-radius:24px;border:none;background:#1D9E75;color:#fff;font-size:15px;font-weight:500;cursor:pointer;margin-top:8px}
-.result-title{font-size:22px;font-weight:500;margin-bottom:6px}
-.result-score{font-size:48px;font-weight:500;color:#1D9E75;line-height:1}
-.result-detail{font-size:13px;color:var(--color-text-secondary);margin:8px 0 1.5rem}
-.result-stars{font-size:28px;letter-spacing:4px;margin:10px 0}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap}
-.sec-btn{padding:10px 22px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer}
-.medal{display:inline-block;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500}
-.medal.gold{background:#FAEEDA;color:#633806}
-.medal.silver{background:#F1EFE8;color:#444441}
-.medal.bronze{background:#FAECE7;color:#712B13}
-.record-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
-.combo-flash{position:absolute;pointer-events:none;font-size:18px;font-weight:500;color:#1D9E75;opacity:0;transition:opacity 0.3s}
-.wordmatch-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.wm-btn{padding:10px 12px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:center;transition:all 0.12s}
-.wm-btn.selected{border-color:#378ADD;background:#E6F1FB;color:#0C447C}
-.wm-btn.matched{border-color:#1D9E75;background:#E1F5EE;color:#085041;cursor:default}
-.wm-btn.wrong-match{border-color:#E24B4A;background:#FCEBEB;color:#791F1F}
+:root {
+  --bg: #0f0c29;
+  --bg2: #1a1a4e;
+  --card: #1e1b4b;
+  --gold: #ffd700;
+  --gold2: #ffaa00;
+  --green: #00e676;
+  --red: #ff5252;
+  --blue: #40c4ff;
+  --purple: #ce93d8;
+  --pink: #f48fb1;
+  --orange: #ffab40;
+  --white: #f0f0ff;
+  --gray: #7986cb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.stars {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 50%, #1a0533 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, #001a3a 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 100%, #0a1a00 0%, transparent 50%),
+              #0a0a1a;
+}
+.stars::before, .stars::after {
+  content: '';
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, white, transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 50% 10%, white, transparent),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 90% 40%, white, transparent),
+    radial-gradient(2px 2px at 20% 90%, rgba(255,215,0,0.8), transparent),
+    radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 80% 70%, white, transparent),
+    radial-gradient(2px 2px at 45% 35%, rgba(100,255,180,0.8), transparent),
+    radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.7), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.stars::after {
+  background-image:
+    radial-gradient(1px 1px at 25% 15%, white, transparent),
+    radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 75% 25%, rgba(255,215,0,0.7), transparent),
+    radial-gradient(1px 1px at 35% 85%, white, transparent),
+    radial-gradient(1px 1px at 85% 55%, rgba(200,150,255,0.8), transparent),
+    radial-gradient(1px 1px at 5% 50%, white, transparent),
+    radial-gradient(1px 1px at 65% 95%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 95% 15%, rgba(100,255,200,0.6), transparent);
+  animation-delay: 2s;
+}
+@keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+.screen { position: relative; z-index: 1; display: none; min-height: 100vh; padding: 20px; }
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* HOME */
+#home { text-align: center; gap: 20px; }
+.logo-area { animation: floatIn 0.8s ease-out; }
+@keyframes floatIn { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
+
+.game-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2em, 6vw, 3.5em);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), var(--orange), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.4));
+}
+.game-subtitle { font-size: 1.1em; color: var(--blue); margin-top: 8px; font-weight: 700; letter-spacing: 1px; }
+.hero-emoji {
+  font-size: 5em; display: block; margin: 10px 0;
+  animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255,215,0,0.5));
+}
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; max-width: 700px; width: 100%; margin-top: 10px;
+}
+.mode-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 22px 16px; cursor: pointer;
+  transition: all 0.3s ease; text-align: center;
+  backdrop-filter: blur(10px); position: relative; overflow: hidden;
+}
+.mode-card::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transition: left 0.5s;
+}
+.mode-card:hover::before { left: 100%; }
+.mode-card:hover { transform: translateY(-6px) scale(1.02); border-color: rgba(255,215,0,0.5); box-shadow: 0 12px 35px rgba(255,215,0,0.15), 0 0 0 1px rgba(255,215,0,0.1); }
+.mode-card .icon { font-size: 2.4em; display: block; margin-bottom: 10px; }
+.mode-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.1em; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+.mode-card p { font-size: 0.78em; color: var(--gray); font-weight: 600; }
+.mode-card.mod1 { border-color: rgba(255,171,64,0.3); }
+.mode-card.mod1:hover { border-color: var(--orange); box-shadow: 0 12px 35px rgba(255,171,64,0.2); }
+.mode-card.mod2 { border-color: rgba(0,230,118,0.3); }
+.mode-card.mod2:hover { border-color: var(--green); box-shadow: 0 12px 35px rgba(0,230,118,0.2); }
+.mode-card.mod3 { border-color: rgba(206,147,216,0.3); }
+.mode-card.mod3:hover { border-color: var(--purple); box-shadow: 0 12px 35px rgba(206,147,216,0.2); }
+.mode-card.full { border-color: rgba(255,215,0,0.3); }
+.mode-card.full:hover { border-color: var(--gold); box-shadow: 0 12px 35px rgba(255,215,0,0.25); }
+
+.high-score-bar {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 12px; padding: 10px 24px; font-size: 0.9em; color: var(--gold); font-weight: 700;
+}
+
+/* GAME */
+#game { padding: 16px; align-items: stretch; max-width: 680px; margin: 0 auto; width: 100%; gap: 16px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
+.stat-badge {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; padding: 8px 14px; text-align: center;
+  font-family: 'Baloo 2', cursive; min-width: 70px;
+}
+.stat-badge .label { font-size: 0.65em; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+.stat-badge .value { font-size: 1.3em; font-weight: 800; color: var(--gold); }
+.progress-bar-wrap { flex: 1; background: rgba(255,255,255,0.1); border-radius: 20px; height: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: 20px; transition: width 0.5s ease; box-shadow: 0 0 8px rgba(64,196,255,0.5); }
+.category-tag {
+  text-align: center; font-size: 0.8em; font-weight: 700; letter-spacing: 1px;
+  padding: 5px 14px; border-radius: 20px; background: rgba(255,255,255,0.07); color: var(--blue); width: 100%;
+}
+.question-card {
+  background: linear-gradient(135deg, rgba(30,27,75,0.9), rgba(15,12,41,0.9));
+  border: 2px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 28px 24px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4); backdrop-filter: blur(20px);
+  animation: cardIn 0.4s ease-out;
+}
+@keyframes cardIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.q-number { font-size: 0.75em; color: var(--gray); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.q-text { font-family: 'Baloo 2', cursive; font-size: clamp(1em, 3vw, 1.2em); font-weight: 600; line-height: 1.5; color: var(--white); margin-bottom: 20px; }
+.options-grid { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.12); border-radius: 14px;
+  padding: 13px 18px; cursor: pointer; transition: all 0.25s ease;
+  font-family: 'Nunito', sans-serif; font-size: 0.93em; font-weight: 700;
+  color: var(--white); text-align: left; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden;
+}
+.option-letter {
+  background: rgba(255,255,255,0.1); border-radius: 8px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85em; font-weight: 900; flex-shrink: 0; color: var(--gray); transition: all 0.25s;
+}
+.option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,215,0,0.4); transform: translateX(4px); box-shadow: 0 4px 15px rgba(255,215,0,0.1); }
+.option-btn:hover:not(:disabled) .option-letter { background: var(--gold); color: var(--bg); }
+.option-btn.correct { background: rgba(0,230,118,0.15); border-color: var(--green); box-shadow: 0 0 20px rgba(0,230,118,0.2); animation: correctPulse 0.5s ease; }
+.option-btn.correct .option-letter { background: var(--green); color: var(--bg); }
+@keyframes correctPulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+.option-btn.wrong { background: rgba(255,82,82,0.15); border-color: var(--red); box-shadow: 0 0 20px rgba(255,82,82,0.2); animation: shake 0.4s ease; }
+.option-btn.wrong .option-letter { background: var(--red); color: white; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+.feedback-box { border-radius: 14px; padding: 12px 18px; font-size: 0.9em; font-weight: 700; margin-top: 4px; display: none; animation: fadeSlide 0.3s ease; line-height: 1.5; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.feedback-box.correct { background: rgba(0,230,118,0.12); border: 1px solid var(--green); color: var(--green); display: block; }
+.feedback-box.wrong { background: rgba(255,82,82,0.12); border: 1px solid var(--red); color: #ff8a80; display: block; }
+.timer-ring-wrap { display: flex; align-items: center; gap: 6px; }
+.timer-value { font-family: 'Baloo 2', cursive; font-size: 1.4em; font-weight: 800; color: var(--blue); min-width: 32px; text-align: center; transition: color 0.3s; }
+.timer-value.urgent { color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+.hearts-row { display: flex; gap: 4px; }
+.heart { font-size: 1.4em; transition: all 0.3s; filter: drop-shadow(0 0 4px rgba(255,82,82,0.6)); }
+.heart.lost { filter: none; opacity: 0.25; transform: scale(0.8); }
+.next-btn {
+  background: linear-gradient(135deg, var(--gold), var(--orange)); border: none; border-radius: 16px;
+  padding: 14px 32px; font-family: 'Baloo 2', cursive; font-size: 1.05em; font-weight: 800;
+  color: var(--bg); cursor: pointer; width: 100%; transition: all 0.25s; display: none;
+  box-shadow: 0 6px 20px rgba(255,170,0,0.3);
+}
+.next-btn:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(255,170,0,0.4); }
+.next-btn.visible { display: block; animation: fadeSlide 0.3s ease; }
+.combo-badge {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+  font-family: 'Baloo 2', cursive; font-size: 2.5em; font-weight: 800;
+  color: var(--orange); text-shadow: 0 0 30px rgba(255,171,64,0.8);
+  pointer-events: none; z-index: 100; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.combo-badge.show { transform: translate(-50%, -50%) scale(1); }
+
+/* RESULT */
+#result { text-align: center; gap: 20px; }
+.result-trophy { font-size: 5em; animation: trophyIn 0.6s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 0 20px rgba(255,215,0,0.6)); }
+@keyframes trophyIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+.result-title { font-family: 'Baloo 2', cursive; font-size: clamp(1.8em, 5vw, 2.5em); font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.score-display { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 20px 40px; display: inline-block; }
+.score-big { font-family: 'Baloo 2', cursive; font-size: 3.5em; font-weight: 800; color: var(--gold); line-height: 1; }
+.score-label { font-size: 0.9em; color: var(--gray); font-weight: 700; margin-top: 4px; }
+.stars-row { display: flex; gap: 12px; justify-content: center; font-size: 2.5em; }
+.star { animation: starPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; transform: scale(0); }
+.star:nth-child(1) { animation-delay: 0.3s; }
+.star:nth-child(2) { animation-delay: 0.5s; }
+.star:nth-child(3) { animation-delay: 0.7s; }
+@keyframes starPop { to { opacity: 1; transform: scale(1); } }
+.stats-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.stat-pill { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 20px; font-weight: 700; font-size: 0.9em; }
+.stat-pill span { color: var(--gold); font-size: 1.2em; display: block; }
+.result-msg { max-width: 400px; font-size: 0.95em; color: var(--gray); font-weight: 700; line-height: 1.6; }
+.btn-group { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.btn-primary { background: linear-gradient(135deg, var(--gold), var(--orange)); border: none; border-radius: 16px; padding: 14px 32px; font-family: 'Baloo 2', cursive; font-size: 1.05em; font-weight: 800; color: var(--bg); cursor: pointer; transition: all 0.25s; box-shadow: 0 6px 20px rgba(255,170,0,0.3); }
+.btn-primary:hover { transform: scale(1.05); }
+.btn-secondary { background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 13px 28px; font-family: 'Baloo 2', cursive; font-size: 1em; font-weight: 700; color: var(--white); cursor: pointer; transition: all 0.25s; }
+.btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); transform: scale(1.03); }
+.new-record { background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 8px 20px; color: var(--gold); font-weight: 800; font-size: 0.9em; display: none; }
+.new-record.show { display: block; animation: fadeSlide 0.3s ease; }
+.confetti-piece { position: fixed; width: 8px; height: 8px; animation: confettiFall linear forwards; z-index: 999; pointer-events: none; }
+@keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 </style>
+</head>
+<body>
+<div class="stars"></div>
+<div id="comboBadge" class="combo-badge"></div>
 
-<div id="game">
-
-<div id="screen-home" class="screen active">
-  <div class="home-title">Aventura na Historia</div>
-  <div class="home-sub">Escolha uma fase e mostre que voce estudou! Responda rapido para ganhar bonus de tempo.</div>
-  <div class="phase-grid" id="phase-grid"></div>
-  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-    <button class="start-btn" onclick="startPhase(currentPhase)">Jogar fase selecionada</button>
-    <div class="hud-box">Recorde: <span id="home-record">0</span> pts</div>
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="logo-area">
+    <span class="hero-emoji">🏛️</span>
+    <div class="game-title">Aventura na História</div>
+    <div class="game-subtitle">5º ANO — PRÉ-HISTÓRIA ATÉ AS PRIMEIRAS CIVILIZAÇÕES</div>
   </div>
-</div>
-
-<div id="screen-quiz" class="screen">
-  <div class="hud">
-    <div class="hud-box">Fase: <span id="hud-phase">1</span></div>
-    <div class="hud-box">Pontos: <span id="hud-score">0</span></div>
-    <div class="hud-box">Combo: <span id="hud-combo">x1</span></div>
-    <div class="lives" id="lives-display"></div>
-    <div class="hud-box" id="hud-qnum">1/5</div>
-  </div>
-  <div class="arena">
-    <div class="phase-badge" id="phase-label">Fase 1</div>
-    <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
-    <div class="question" id="q-text"></div>
-    <div class="opts" id="opts-container"></div>
-    <div class="feedback-bar" id="feedback"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Proxima pergunta</button>
-  </div>
-</div>
-
-<div id="screen-wordmatch" class="screen">
-  <div class="hud">
-    <div class="hud-box">Palavra x Definicao</div>
-    <div class="hud-box">Pontos: <span id="wm-score">0</span></div>
-    <div class="hud-box" id="wm-pairs">0/5 pares</div>
-  </div>
-  <div class="arena">
-    <div class="phase-badge">Desafio especial - conecte palavra e definicao!</div>
-    <div style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary)" id="wm-instruction">Selecione uma palavra e depois a definicao correta</div>
-    <div class="wordmatch-grid" id="wm-words"></div>
-    <div class="feedback-bar" id="wm-feedback"></div>
-    <button class="next-btn" id="wm-next" onclick="endWordMatch()">Ver resultado</button>
-  </div>
-</div>
-
-<div id="screen-result" class="screen">
-  <div class="arena" style="text-align:center;padding:2rem 1.5rem">
-    <div class="result-stars" id="result-stars">***</div>
-    <div class="result-title" id="result-title">Fase concluida!</div>
-    <div class="result-score" id="result-score">0</div>
-    <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">pontos</div>
-    <div class="result-detail" id="result-detail"></div>
-    <div class="btn-row" style="justify-content:center">
-      <button class="start-btn" onclick="retryPhase()">Tentar de novo</button>
-      <button class="sec-btn" onclick="goHome()">Escolher outra fase</button>
+  <div class="mode-grid">
+    <div class="mode-card mod1" onclick="startGame('mod1')">
+      <span class="icon">🦴</span>
+      <h3>Pré-História</h3>
+      <p>Hominídeos, nomadismo<br>e Homo sapiens</p>
+    </div>
+    <div class="mode-card mod2" onclick="startGame('mod2')">
+      <span class="icon">🏘️</span>
+      <h3>Vilarejos</h3>
+      <p>Agricultura, pecuária<br>e vida sedentária</p>
+    </div>
+    <div class="mode-card mod3" onclick="startGame('mod3')">
+      <span class="icon">🏛️</span>
+      <h3>Primeiras Cidades</h3>
+      <p>Egito, Mesopotâmia<br>e a escrita</p>
+    </div>
+    <div class="mode-card full" onclick="startGame('all')">
+      <span class="icon">⚔️</span>
+      <h3>Modo Completo</h3>
+      <p>Todas as fases misturadas<br>15 perguntas – Desafio!</p>
     </div>
   </div>
+  <div class="high-score-bar">🏆 Recorde: <span id="highScoreVal">0</span> pontos</div>
 </div>
 
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div class="stat-badge">
+      <div class="label">Pontos</div>
+      <div class="value" id="scoreVal">0</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="stat-badge timer-ring-wrap">
+      <div class="label">Tempo</div>
+      <div class="timer-value" id="timerVal">15</div>
+    </div>
+    <div class="hearts-row">
+      <span class="heart" id="h1">❤️</span>
+      <span class="heart" id="h2">❤️</span>
+      <span class="heart" id="h3">❤️</span>
+    </div>
+  </div>
+  <div class="category-tag" id="categoryTag">Categoria</div>
+  <div class="question-card">
+    <div class="q-number" id="qNumber">Questão 1 de 10</div>
+    <div class="q-text" id="qText"></div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-box" id="feedbackBox"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Próxima Pergunta ➜</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-trophy" id="resultTrophy">🏆</div>
+  <div class="result-title" id="resultTitle">Incrível!</div>
+  <div class="stars-row">
+    <span class="star" id="s1">⭐</span>
+    <span class="star" id="s2">⭐</span>
+    <span class="star" id="s3">⭐</span>
+  </div>
+  <div class="score-display">
+    <div class="score-big" id="finalScore">0</div>
+    <div class="score-label">PONTOS</div>
+  </div>
+  <div class="new-record" id="newRecord">🎉 NOVO RECORDE!</div>
+  <div class="stats-row">
+    <div class="stat-pill">✅ Acertos<span id="finalCorrect">0</span></div>
+    <div class="stat-pill">❌ Erros<span id="finalWrong">0</span></div>
+    <div class="stat-pill">🔥 Combo Máx<span id="finalCombo">0</span></div>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div class="btn-group">
+    <button class="btn-primary" onclick="startGame(lastMode)">🔄 Jogar de Novo</button>
+    <button class="btn-secondary" onclick="showHome()">🏠 Menu</button>
+  </div>
 </div>
 
 <script>
-const PHASES=[
-  {
-    id:1,name:"Pre-Historia",icon:"🦴",color:"#E1F5EE",desc:"Hominideos e nomadismo",
-    questions:[
-      {q:"Os hominideos surgiram em qual continente?",opts:["Europa","America","Africa","Asia"],a:2,exp:"Os vestigios mais antigos foram encontrados na Africa!"},
-      {q:"Como se chama o estilo de vida de quem nao tem moradia fixa?",opts:["Sedentarismo","Nomadismo","Agricultura","Comercio"],a:1,exp:"Nomades sao grupos que vivem se mudando para buscar alimentos."},
-      {q:"Qual era a principal atividade dos grupos da Pre-Historia?",opts:["Agricultura","Comercio","Caca e coleta","Pecuaria"],a:2,exp:"Caca e coleta de frutas, raizes e sementes eram as principais atividades."},
-      {q:"As cavernas eram usadas como abrigos...",opts:["Fixos e permanentes","Temporarios","Construidos pelo grupo","Exclusivos dos lideres"],a:1,exp:"As cavernas eram abrigos temporarios — os grupos estavam sempre se mudando!"},
-      {q:"A maior parte da Pre-Historia e chamada de Idade da...",opts:["Ouro","Pedra","Ferro","Bronze"],a:1,exp:"Idade da Pedra, pois as ferramentas eram feitas de pedra lascada."},
-    ]
-  },
-  {
-    id:2,name:"Homo sapiens",icon:"🧠",color:"#E6F1FB",desc:"Nossa especie e seus habitos",
-    questions:[
-      {q:"O Homo sapiens e a unica especie humana que...",opts:["Ja existiu","Ainda existe hoje","Viveu na Europa","Dominava o fogo"],a:1,exp:"Somos todos Homo sapiens — a unica especie humana sobrevivente!"},
-      {q:"Ha quantos anos os caes foram domesticados?",opts:["Ha 5 mil anos","Ha 30 mil anos","Ha 15 mil anos","Ha 1 milhao de anos"],a:2,exp:"A domesticacao dos caes ocorreu ha cerca de 15 mil anos."},
-      {q:"O que os caes ajudavam os grupos humanos a fazer?",opts:["Cultivar plantas","Transportar, proteger e cazar","Escrever registros","Controlar cheias dos rios"],a:1,exp:"Caes eram usados para transporte de cargas, protecao e auxilio na caca."},
-      {q:"Por que era impossivel sobreviver sozinho na Pre-Historia?",opts:["Por causa dos impostos","Porque os lideres proibiam","Porque a natureza e os predadores eram perigosos demais","Porque nao havia agua"],a:2,exp:"O perigo dos predadores e a dificuldade de encontrar alimentos fazia a vida em grupo indispensavel."},
-      {q:"Quais materiais os grupos da Pre-Historia usavam para fazer ferramentas?",opts:["Ferro e ouro","Pedras e madeiras","Barro e bronze","Ossos e cobre"],a:1,exp:"Pedras e madeiras eram os materiais mais usados — por isso chamamos de Idade da Pedra!"},
-    ]
-  },
-  {
-    id:3,name:"Vilarejos",icon:"🏘️",color:"#EEEDFE",desc:"Como surgiram as primeiras comunidades",
-    questions:[
-      {q:"O que fez os grupos humanos se tornarem sedentarios?",opts:["A invencao da escrita","O desenvolvimento da agricultura e pecuaria","A construcao de muralhas","A chegada do fogo"],a:1,exp:"Cultivar alimentos e criar animais permitiu que os grupos parassem de se mudar."},
-      {q:"Como eram chamados os pequenos agrupamentos de casas?",opts:["Metropoles","Imperios","Vilarejos","Piramides"],a:2,exp:"Vilarejos sao pequenos agrupamentos de casas — o comeco das cidades!"},
-      {q:"De que material eram feitas as primeiras casas dos vilarejos?",opts:["Concreto e metal","Palha e madeira, depois barro e pedra","So de pedra","So de madeira"],a:1,exp:"Primeiro palha e madeira, depois evoluiram para tijolos de barro e pedra."},
-      {q:"Quem era o lider nos primeiros vilarejos?",opts:["O mais forte do grupo","O homem mais velho","O que tinha mais comida","O mais jovem"],a:1,exp:"O homem mais velho era o chefe — ele guardava as historias e a memoria do grupo."},
-      {q:"O que os canais de irrigacao faziam nos vilarejos?",opts:["Separavam inimigos","Levavam agua do rio ate as plantacoes","Protegiam de animais","Guardavam alimentos excedentes"],a:1,exp:"Canais de irrigacao eram vias de agua construidas para regar as plantacoes distantes dos rios."},
-    ]
-  },
-  {
-    id:4,name:"Primeiras cidades",icon:"🏙️",color:"#FAECE7",desc:"Mesopotamia e Egito Antigo",
-    questions:[
-      {q:"A Mesopotamia ficava entre quais dois rios?",opts:["Nilo e Amazonas","Tigre e Eufrates","Danubio e Reno","Jordao e Nilo"],a:1,exp:"Mesopotamia significa 'terra entre rios' — os rios Tigre e Eufrates."},
-      {q:"O Rio Nilo era importante para o Egito porque:",opts:["Era um obstáculo natural","Suas cheias depositavam terra fertil nas margens","Fornecia minerais preciosos","Era usado para pesca apenas"],a:1,exp:"As cheias do Nilo depositavam humus — terra muito fertil — ideal para agricultura."},
-      {q:"Como era chamado o governante do Egito Antigo?",opts:["Rei","Presidente","Farao","Imperador"],a:2,exp:"O Farao era o governante do Egito, considerado um lider divino."},
-      {q:"O que eram os 'excedentes' nas primeiras cidades?",opts:["Comidas estragadas","Producao alem do necessario para consumo","Armas para combate","Ferramentas emprestadas"],a:1,exp:"Excedente e o que sobra apos o consumo — era usado para trocas com outros povos."},
-      {q:"Para que serviam as muralhas na Mesopotamia?",opts:["Guardar agua das chuvas","Proteger a cidade de ataques de inimigos","Separar ricos de pobres","Apoiar construcoes"],a:1,exp:"As muralhas protegiam as cidades mesopotamicas de ataques de povos vizinhos."},
-    ]
-  },
-  {
-    id:5,name:"A escrita",icon:"✍️",color:"#EAF3DE",desc:"Cuneiforme, hieroglifos e escribas",
-    questions:[
-      {q:"Como se chama a escrita criada na Mesopotamia?",opts:["Hieroglifos","Escrita cuneiforme","Alfabeto fenicio","Pictogramas maias"],a:1,exp:"A escrita cuneiforme era feita pressionando uma cunha em tabuletas de argila."},
-      {q:"Os hieroglifos eram a escrita de qual povo?",opts:["Mesopotamia","China","Roma","Egito Antigo"],a:3,exp:"Os hieroglifos eram os simbolos usados pelos egipcios para escrever."},
-      {q:"Quem eram os escribas?",opts:["Guerreiros especialistas","Sacerdotes religiosos","Pessoas especializadas em escrever","Comerciantes viajantes"],a:2,exp:"Escribas eram especialistas em escrita — uma profissao muito valorizada na antiguidade."},
-      {q:"Em que material eram feitas as tabuletas cuneiformes?",opts:["Papiro","Pedra lascada","Argila","Pele de animal"],a:2,exp:"A argila era pressionada com uma cunha para criar os simbolos cuneiformes."},
-      {q:"O papiro era usado como papel pelos:",opts:["Mesopotamios","Gregos","Chines","Egipcios"],a:3,exp:"O papiro era uma planta das margens do Nilo que os egipcios usavam para escrever."},
-    ]
+const allQuestions = {
+  mod1: [
+    { cat: "🦴 Hominídeos", q: "Os hominídeos surgiram em qual continente?", opts: ["Europa", "América", "África", "Ásia"], ans: 2, tip: "Os vestígios mais antigos foram encontrados na África — berço da humanidade!" },
+    { cat: "🦴 Hominídeos", q: "Como se chama o estilo de vida dos grupos que viviam se mudando de lugar?", opts: ["Sedentarismo", "Nomadismo", "Agricultura", "Comércio"], ans: 1, tip: "Nômades = sem moradia fixa, sempre buscando alimentos em novos lugares!" },
+    { cat: "🦴 Hominídeos", q: "Os grupos da Pré-História viviam de que forma?", opts: ["Cada um por si, sozinhos", "Em grupos, pois sozinhos era impossível sobreviver", "Em grandes cidades", "Sem nenhuma organização"], ans: 1, tip: "Viver em grupo era essencial para se proteger e conseguir alimentos!" },
+    { cat: "🧠 Homo sapiens", q: "O Homo sapiens é:", opts: ["Uma espécie já extinta", "A única espécie humana que existe hoje", "Um hominídeo que vivia só na Europa", "O nome do primeiro faraó"], ans: 1, tip: "Somos todos Homo sapiens — a única espécie humana sobrevivente no planeta!" },
+    { cat: "🧠 Homo sapiens", q: "Qual era a principal atividade dos grupos da Pré-História?", opts: ["Agricultura e plantio", "Comércio entre cidades", "Caça e coleta de frutas e raízes", "Construção de pirâmides"], ans: 2, tip: "Caça e coleta eram as atividades básicas antes da agricultura existir!" },
+    { cat: "🧠 Homo sapiens", q: "De que materiais os grupos da Pré-História faziam ferramentas?", opts: ["Ferro e ouro", "Pedras e madeiras", "Barro e bronze", "Vidro e plástico"], ans: 1, tip: "Pedras e madeiras — por isso chamamos de Idade da Pedra!" },
+    { cat: "🦴 Hominídeos", q: "As cavernas eram usadas pelos grupos pré-históricos como:", opts: ["Moradias permanentes", "Abrigos temporários", "Locais de comércio", "Escolas para crianças"], ans: 1, tip: "Cavernas eram abrigos temporários — os grupos estavam sempre se mudando!" },
+    { cat: "🏛️ Pré-História", q: "A maior parte da Pré-História é chamada de Idade da:", opts: ["Ouro", "Ferro", "Pedra", "Bronze"], ans: 2, tip: "Idade da Pedra porque as ferramentas eram feitas de pedra lascada!" },
+    { cat: "🐕 Domesticação", q: "Há quantos anos os cães foram domesticados?", opts: ["Há 5 mil anos", "Há 15 mil anos", "Há 100 mil anos", "Há 1 milhão de anos"], ans: 1, tip: "Os cães foram os primeiros animais domesticados, há cerca de 15 mil anos!" },
+    { cat: "🐕 Domesticação", q: "Os cães domesticados ajudavam os grupos humanos a:", opts: ["Cultivar plantas", "Transportar cargas, proteger e caçar", "Escrever registros", "Construir casas"], ans: 1, tip: "Cães eram parceiros de caça, guarda e transporte — companheiros incríveis!" },
+  ],
+  mod2: [
+    { cat: "🌾 Agricultura", q: "O que fez os grupos humanos se tornarem sedentários?", opts: ["A invenção da escrita", "O desenvolvimento da agricultura e da pecuária", "A construção de muralhas", "A chegada dos vikings"], ans: 1, tip: "Cultivar alimentos permitiu que os grupos parassem de se mudar!" },
+    { cat: "🌾 Agricultura", q: "Há aproximadamente quantos anos surgiu a agricultura?", opts: ["Há 500 anos", "Há 2 mil anos", "Há 12 a 18 mil anos", "Há 1 milhão de anos"], ans: 2, tip: "A agricultura surgiu há 12 a 18 mil anos, quando o clima melhorou e o solo ficou fértil!" },
+    { cat: "🐄 Pecuária", q: "O que é pecuária?", opts: ["O estudo dos rios antigos", "A criação de animais domésticos", "A fabricação de cerâmica", "O comércio entre cidades"], ans: 1, tip: "Pecuária = criação de animais como bois, ovelhas, porcos e aves!" },
+    { cat: "🏘️ Vilarejos", q: "Como eram chamados os pequenos agrupamentos de casas formados pelos sedentários?", opts: ["Metrópoles", "Impérios", "Vilarejos", "Pirâmides"], ans: 2, tip: "Vilarejos eram pequenos agrupamentos — o começo de tudo que virou cidade!" },
+    { cat: "🏘️ Vilarejos", q: "De que material eram feitas as primeiras casas dos vilarejos?", opts: ["Concreto e aço", "Palha e madeira, depois barro e pedra", "Só de pedra dura", "Plástico e metal"], ans: 1, tip: "Evoluíram: primeiro palha e madeira, depois tijolos de barro e pedra!" },
+    { cat: "🏘️ Vilarejos", q: "Quem era geralmente o líder nos primeiros vilarejos?", opts: ["O mais forte fisicamente", "O homem mais velho do grupo", "A pessoa mais rica", "O mais jovem"], ans: 1, tip: "O mais velho guardava histórias e a memória do grupo — o saber valia muito!" },
+    { cat: "💧 Irrigação", q: "Para que serviam os canais de irrigação nos vilarejos?", opts: ["Separar inimigos", "Levar água do rio até as plantações", "Armazenar excedentes de alimentos", "Proteger de animais selvagens"], ans: 1, tip: "Canais levavam água do rio às plantações distantes — uma engenharia incrível!" },
+    { cat: "🔧 Tecnologia", q: "Qual animal ajudava os humanos no trabalho pesado nas primeiras aldeias?", opts: ["Leão", "Cavalo selvagem", "Boi doméstico", "Lobo"], ans: 2, tip: "O boi domesticado puxava arados e carroças — era o trator da antiguidade!" },
+    { cat: "🌾 Agricultura", q: "O que significa produzir 'excedentes' de alimentos?", opts: ["Produzir menos do que precisa", "Desperdiçar comida", "Produzir mais do que o necessário para consumo", "Importar comida de outros países"], ans: 2, tip: "Excedente = sobra! E essa sobra podia ser trocada com outros grupos!" },
+    { cat: "🏘️ Vilarejos", q: "Com o crescimento dos vilarejos, as casas passaram a ser construídas com:", opts: ["Apenas palha natural", "Somente couro de animais", "Tijolos de barro e pedra", "Madeira de árvores exóticas"], ans: 2, tip: "A evolução das casas mostrou o avanço da tecnologia humana ao longo do tempo!" },
+  ],
+  mod3: [
+    { cat: "🏙️ Primeiras Cidades", q: "A Mesopotâmia ficava entre quais dois rios?", opts: ["Nilo e Amazonas", "Tigre e Eufrates", "Danúbio e Reno", "Jordão e Nilo"], ans: 1, tip: "Mesopotâmia = 'terra entre rios' (Tigre e Eufrates). Atual Iraque!" },
+    { cat: "🇪🇬 Egito Antigo", q: "O Rio Nilo era fundamental para o Egito porque:", opts: ["Era uma barreira contra inimigos", "Suas cheias depositavam terra fértil nas margens", "Fornecia ouro em abundância", "Era usado só para pesca"], ans: 1, tip: "As cheias do Nilo depositavam húmus — terra riquíssima para cultivar!" },
+    { cat: "🇪🇬 Egito Antigo", q: "Como era chamado o governante do Egito Antigo?", opts: ["Rei", "Presidente", "Faraó", "Imperador"], ans: 2, tip: "O Faraó era líder político E religioso — considerado quase um deus!" },
+    { cat: "🏙️ Primeiras Cidades", q: "O que eram os 'excedentes' nas primeiras cidades?", opts: ["Alimentos estragados", "Produção além do necessário, usada para trocas", "Armas de combate", "Escravos capturados"], ans: 1, tip: "Excedente virou moeda de troca — base do comércio entre cidades!" },
+    { cat: "🏰 Mesopotâmia", q: "Para que serviam as muralhas nas cidades mesopotâmicas?", opts: ["Guardar água da chuva", "Proteger a cidade de ataques inimigos", "Separar ricos de pobres", "Apoiar construções pesadas"], ans: 1, tip: "Muralhas eram a defesa das cidades contra invasores e saques!" },
+    { cat: "🏰 Mesopotâmia", q: "Cada cidade na Mesopotâmia tinha:", opts: ["Um único governante para todas", "Seu próprio governante independente", "Governantes escolhidos pelo povo", "Sem governante — eram democráticas"], ans: 1, tip: "Cada cidade-estado mesopotâmica era independente com seu próprio rei!" },
+    { cat: "✍️ A Escrita", q: "Como se chama a escrita criada na Mesopotâmia?", opts: ["Hieróglifos", "Escrita cuneiforme", "Alfabeto fenício", "Pictogramas maias"], ans: 1, tip: "Cuneiforme = feita com cunha em tabuletas de argila. Primeira escrita do mundo!" },
+    { cat: "✍️ A Escrita", q: "Os hieróglifos eram a escrita de qual povo?", opts: ["Mesopotâmicos", "Chineses", "Romanos", "Egípcios"], ans: 3, tip: "Hieróglifos = símbolos sagrados dos egípcios, com mais de 800 sinais!" },
+    { cat: "✍️ A Escrita", q: "Como se chamavam os especialistas em escrita nas civilizações antigas?", opts: ["Guerreiros", "Sacerdotes", "Escribas", "Comerciantes"], ans: 2, tip: "Escribas eram muito valorizados — saber ler e escrever era poder!" },
+    { cat: "📜 Papiro", q: "O papiro usado pelos egípcios para escrever era feito de:", opts: ["Pele de animal", "Uma planta das margens do Rio Nilo", "Argila seca ao sol", "Pedra fina laminada"], ans: 1, tip: "O papiro era uma planta do Nilo — o 'papel' da antiguidade! Daí vem a palavra 'papel'!" },
+    { cat: "👑 Governantes", q: "Qual era a principal responsabilidade do governante nas primeiras cidades?", opts: ["Construir pirâmides", "Controlar alimentos, leis e a defesa da cidade", "Criar animais domésticos", "Ensinar as crianças a escrever"], ans: 1, tip: "O governante coordenava tudo: comida, regras, proteção e obras!" },
+    { cat: "🏙️ Primeiras Cidades", q: "As primeiras cidades surgiram principalmente em qual região?", opts: ["América do Sul", "Europa Ocidental", "Oriente Médio (Mesopotâmia e Egito)", "África do Sul"], ans: 2, tip: "Oriente Médio foi o berço das primeiras cidades, há cerca de 10 mil anos!" },
+  ]
+};
+
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let correct = 0;
+let wrong = 0;
+let combo = 0;
+let maxCombo = 0;
+let lives = 3;
+let timer = null;
+let timeLeft = 15;
+let lastMode = 'all';
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-];
-
-const WORDMATCH_DATA=[
-  {word:"Nomades",def:"Grupos sem moradia fixa que se mudavam para buscar alimentos"},
-  {word:"Sedentarios",def:"Grupos que pararam de se mudar e fixaram-se em um lugar"},
-  {word:"Excedente",def:"Producao alem do necessario — permitia trocas"},
-  {word:"Escribas",def:"Especialistas em escrita nas antigas civilizacoes"},
-  {word:"Farao",def:"Governante do Egito Antigo, considerado lider divino"},
-  {word:"Mesopotamia",def:"Regiao entre os rios Tigre e Eufrates"},
-  {word:"Hieroglifos",def:"Simbolos escritos criados pelos egipcios"},
-  {word:"Pecuaria",def:"Criacao de animais domesticos para alimentacao e trabalho"},
-];
-
-let state={phase:0,qIndex:0,score:0,lives:3,combo:0,timer:null,timerVal:0,answered:false,phaseScore:0,record:0,unlockedPhases:[1,2]};
-let currentPhase=0;
-let wmState={};
-
-function initHome(){
-  const grid=document.getElementById('phase-grid');
-  grid.innerHTML='';
-  document.getElementById('home-record').textContent=state.record;
-  PHASES.forEach((p,i)=>{
-    const unlocked=state.unlockedPhases.includes(p.id);
-    const d=document.createElement('div');
-    d.className='phase-card'+(unlocked?'':' locked');
-    d.style.borderTop='3px solid '+(unlocked?'#1D9E75':'var(--color-border-tertiary)');
-    d.innerHTML=`<div class="phase-icon" style="font-size:22px">${p.icon}</div><div class="phase-name">${p.name}</div><div class="phase-info">${p.desc}</div><div class="phase-info" style="margin-top:4px;color:#1D9E75">${unlocked?'Disponivel':'Bloqueado'}</div>`;
-    if(unlocked){d.onclick=()=>{currentPhase=i;highlightPhase(i)};}
-    grid.appendChild(d);
-  });
-  const wm=document.createElement('div');
-  wm.className='phase-card';
-  wm.style.borderTop='3px solid #378ADD';
-  wm.innerHTML=`<div class="phase-icon" style="font-size:22px">🔗</div><div class="phase-name">Conectar palavras</div><div class="phase-info">Ligue palavras e definicoes</div><div class="phase-info" style="margin-top:4px;color:#378ADD">Disponivel</div>`;
-  wm.onclick=()=>{currentPhase='wm';highlightPhase('wm-extra')};
-  grid.appendChild(wm);
-  highlightPhase(currentPhase);
+  return a;
 }
 
-function highlightPhase(idx){
-  document.querySelectorAll('.phase-card').forEach(c=>c.style.outline='none');
-  const cards=document.querySelectorAll('.phase-card');
-  if(idx==='wm-extra'){cards[cards.length-1].style.outline='2px solid #378ADD';}
-  else if(typeof idx==='number'&&cards[idx]){cards[idx].style.outline='2px solid #1D9E75';}
-}
-
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-
-function startPhase(pIdx){
-  if(pIdx==='wm'){startWordMatch();return;}
-  if(typeof pIdx!=='number')return;
-  const p=PHASES[pIdx];
-  if(!state.unlockedPhases.includes(p.id)){alert('Complete fases anteriores para desbloquear!');return;}
-  state.phase=pIdx;state.qIndex=0;state.score=0;state.lives=3;state.combo=0;state.phaseScore=0;state.answered=false;
-  show('screen-quiz');
+function startGame(mode) {
+  lastMode = mode;
+  let pool = [];
+  if (mode === 'all') {
+    pool = [...allQuestions.mod1, ...allQuestions.mod2, ...allQuestions.mod3];
+  } else {
+    pool = [...allQuestions[mode]];
+  }
+  currentQuestions = shuffle(pool).slice(0, mode === 'all' ? 15 : 10);
+  currentIndex = 0; score = 0; correct = 0; wrong = 0; combo = 0; maxCombo = 0; lives = 3; answered = false;
+  showScreen('game');
+  updateHearts();
   loadQuestion();
 }
 
-function loadQuestion(){
-  const p=PHASES[state.phase];
-  const q=p.questions[state.qIndex];
-  state.answered=false;
-  document.getElementById('phase-label').textContent=p.icon+' '+p.name;
-  document.getElementById('hud-phase').textContent=state.phase+1;
-  document.getElementById('hud-score').textContent=state.score;
-  document.getElementById('hud-combo').textContent='x'+(state.combo+1);
-  document.getElementById('hud-qnum').textContent=(state.qIndex+1)+'/'+p.questions.length;
-  updateLives();
-  document.getElementById('q-text').textContent=q.q;
-  const fb=document.getElementById('feedback');fb.className='feedback-bar';fb.textContent='';
-  const nb=document.getElementById('next-btn');nb.className='next-btn';
-  const opts=document.getElementById('opts-container');
-  opts.innerHTML='';
-  q.opts.forEach((o,i)=>{
-    const b=document.createElement('button');
-    b.className='opt-btn';b.textContent=o;
-    b.onclick=()=>answerQ(i);
-    opts.appendChild(b);
+function loadQuestion() {
+  answered = false;
+  clearInterval(timer);
+  const q = currentQuestions[currentIndex];
+  const total = currentQuestions.length;
+  document.getElementById('qNumber').textContent = `Questão ${currentIndex + 1} de ${total}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('categoryTag').textContent = q.cat;
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('progressBar').style.width = `${(currentIndex / total) * 100}%`;
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  const shuffledOpts = shuffle(q.opts.map((o, i) => ({ text: o, correct: i === q.ans })));
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt.text}`;
+    btn.onclick = () => selectAnswer(btn, opt.correct, q.tip);
+    grid.appendChild(btn);
   });
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('feedbackBox').textContent = '';
+  document.getElementById('nextBtn').className = 'next-btn';
   startTimer();
 }
 
-function startTimer(){
-  clearInterval(state.timer);
-  state.timerVal=100;
-  const fill=document.getElementById('timer-fill');
-  fill.style.width='100%';fill.className='timer-fill';
-  state.timer=setInterval(()=>{
-    state.timerVal-=1.4;
-    fill.style.width=Math.max(0,state.timerVal)+'%';
-    if(state.timerVal<40)fill.className='timer-fill warning';
-    if(state.timerVal<20)fill.className='timer-fill danger';
-    if(state.timerVal<=0){clearInterval(state.timer);timeOut();}
-  },100);
+function startTimer() {
+  timeLeft = 15;
+  updateTimer();
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) { clearInterval(timer); if (!answered) timeOut(); }
+  }, 1000);
 }
 
-function timeOut(){
-  if(state.answered)return;
-  state.answered=true;state.combo=0;state.lives--;
-  updateLives();
-  const q=PHASES[state.phase].questions[state.qIndex];
-  const btns=document.querySelectorAll('.opt-btn');
-  btns.forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add('correct');});
-  const fb=document.getElementById('feedback');fb.className='feedback-bar show err';fb.textContent='Tempo esgotado! '+q.exp;
-  document.getElementById('next-btn').className='next-btn show';
-  if(state.lives<=0){setTimeout(gameOver,1200);}
+function updateTimer() {
+  const el = document.getElementById('timerVal');
+  el.textContent = timeLeft;
+  el.className = timeLeft <= 5 ? 'timer-value urgent' : 'timer-value';
 }
 
-function answerQ(chosen){
-  if(state.answered)return;
-  state.answered=true;clearInterval(state.timer);
-  const q=PHASES[state.phase].questions[state.qIndex];
-  const btns=document.querySelectorAll('.opt-btn');
-  btns.forEach(b=>b.disabled=true);
-  const fb=document.getElementById('feedback');
-  const timeBonus=Math.round(state.timerVal/10);
-  if(chosen===q.a){
-    btns[chosen].classList.add('correct');
-    state.combo++;
-    const pts=100+(state.combo>1?(state.combo-1)*20:0)+timeBonus;
-    state.score+=pts;state.phaseScore+=pts;
-    document.getElementById('hud-score').textContent=state.score;
-    document.getElementById('hud-combo').textContent='x'+(state.combo);
-    fb.className='feedback-bar show ok';
-    fb.textContent='Correto! +'+pts+' pts'+(timeBonus>5?' (bonus rapido!)':'')+(state.combo>1?' COMBO x'+state.combo+'!':'')+' | '+q.exp;
+function timeOut() {
+  answered = true; combo = 0; wrong++; loseLife();
+  const fb = document.getElementById('feedbackBox');
+  fb.textContent = '⏱️ Tempo esgotado! ' + currentQuestions[currentIndex].tip;
+  fb.className = 'feedback-box wrong';
+  document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+  document.getElementById('nextBtn').className = 'next-btn visible';
+  if (lives <= 0) setTimeout(showResult, 1200);
+}
+
+function selectAnswer(btn, isCorrect, tip) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedbackBox');
+  if (isCorrect) {
+    btn.className = 'option-btn correct';
+    combo++; correct++;
+    if (combo > maxCombo) maxCombo = combo;
+    const timeBonus = Math.max(0, timeLeft * 5);
+    const comboBonus = combo > 1 ? (combo - 1) * 25 : 0;
+    const points = 100 + timeBonus + comboBonus;
+    score += points;
+    fb.textContent = `✅ Correto! +${points} pontos${combo > 1 ? ' 🔥 COMBO x' + combo + '!' : ''}  — ${tip}`;
+    fb.className = 'feedback-box correct';
+    if (combo > 1) showCombo(combo);
   } else {
-    btns[chosen].classList.add('wrong');btns[q.a].classList.add('correct');
-    state.combo=0;state.lives--;updateLives();
-    fb.className='feedback-bar show err';fb.textContent='Errado! '+q.exp;
-    if(state.lives<=0){setTimeout(gameOver,1200);return;}
+    btn.className = 'option-btn wrong';
+    combo = 0; wrong++; loseLife();
+    fb.textContent = `❌ Errou! ${tip}`;
+    fb.className = 'feedback-box wrong';
+    if (lives <= 0) { document.getElementById('nextBtn').className = 'next-btn visible'; setTimeout(showResult, 1200); return; }
   }
-  document.getElementById('next-btn').className='next-btn show';
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('nextBtn').className = 'next-btn visible';
 }
 
-function nextQuestion(){
-  state.qIndex++;
-  if(state.qIndex>=PHASES[state.phase].questions.length){endPhase();}
-  else{loadQuestion();}
-}
+function loseLife() { lives--; updateHearts(); }
 
-function updateLives(){
-  const d=document.getElementById('lives-display');
-  d.innerHTML='';
-  for(let i=0;i<3;i++){const s=document.createElement('span');s.className='heart'+(i>=state.lives?' empty':'');s.style.fontSize='16px';s.textContent='♥';d.appendChild(s);}
-}
-
-function endPhase(){
-  clearInterval(state.timer);
-  const p=PHASES[state.phase];
-  const pct=state.phaseScore/(p.questions.length*130);
-  let stars='★★★',title='Incrivel!',msg='';
-  if(pct<0.4){stars='★☆☆';title='Continue tentando!';}
-  else if(pct<0.7){stars='★★☆';title='Bom trabalho!';}
-  else{stars='★★★';title='Incrivel!';if(!state.unlockedPhases.includes((state.phase+2)))state.unlockedPhases.push(state.phase+2);}
-  if(state.score>state.record)state.record=state.score;
-  msg=p.questions.length+' perguntas respondidas. '+p.questions.length-state.lives+' erros.';
-  document.getElementById('result-stars').textContent=stars;
-  document.getElementById('result-title').textContent=title;
-  document.getElementById('result-score').textContent=state.score;
-  document.getElementById('result-detail').textContent='Fase: '+p.name+' | Combos: '+state.combo;
-  show('screen-result');
-}
-
-function gameOver(){
-  clearInterval(state.timer);
-  document.getElementById('result-stars').textContent='☆☆☆';
-  document.getElementById('result-title').textContent='Game over!';
-  document.getElementById('result-score').textContent=state.score;
-  document.getElementById('result-detail').textContent='Suas vidas acabaram. Tente de novo!';
-  show('screen-result');
-}
-
-function retryPhase(){show('screen-quiz');startPhase(state.phase);}
-function goHome(){show('screen-home');initHome();}
-
-function startWordMatch(){
-  const pool=[...WORDMATCH_DATA].sort(()=>Math.random()-0.5).slice(0,5);
-  wmState={pairs:pool,selected:null,matched:[],score:0,wrongCount:0};
-  const words=pool.map(p=>p.word);
-  const defs=pool.map(p=>p.def).sort(()=>Math.random()-0.5);
-  document.getElementById('wm-score').textContent=0;
-  document.getElementById('wm-pairs').textContent='0/'+pool.length+' pares';
-  const fb=document.getElementById('wm-feedback');fb.className='feedback-bar';fb.textContent='';
-  document.getElementById('wm-next').className='next-btn';
-  const grid=document.getElementById('wm-words');
-  grid.innerHTML='';
-  grid.style.gridTemplateColumns='1fr 1fr';
-  words.forEach(w=>{
-    const b=document.createElement('button');
-    b.className='wm-btn';b.textContent=w;b.dataset.type='word';b.dataset.val=w;
-    b.onclick=()=>wmClick(b,'word',w);
-    grid.appendChild(b);
-  });
-  defs.forEach(d=>{
-    const b=document.createElement('button');
-    b.className='wm-btn';b.style.fontSize='11px';b.textContent=d;b.dataset.type='def';b.dataset.val=d;
-    b.onclick=()=>wmClick(b,'def',d);
-    grid.appendChild(b);
-  });
-  show('screen-wordmatch');
-}
-
-function wmClick(btn,type,val){
-  if(btn.classList.contains('matched'))return;
-  const fb=document.getElementById('wm-feedback');
-  if(!wmState.selected){
-    document.querySelectorAll('.wm-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    wmState.selected={type,val,btn};
-  } else {
-    if(wmState.selected.type===type){
-      document.querySelectorAll('.wm-btn').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      wmState.selected={type,val,btn};return;
-    }
-    const prev=wmState.selected;
-    wmState.selected=null;
-    const wordVal=type==='word'?val:prev.val;
-    const defVal=type==='def'?val:prev.val;
-    const wordBtn=type==='word'?btn:prev.btn;
-    const defBtn=type==='def'?btn:prev.btn;
-    const pair=wmState.pairs.find(p=>p.word===wordVal&&p.def===defVal);
-    if(pair){
-      wordBtn.classList.remove('selected');defBtn.classList.remove('selected');
-      wordBtn.classList.add('matched');defBtn.classList.add('matched');
-      wmState.matched.push(pair);
-      wmState.score+=100;
-      document.getElementById('wm-score').textContent=wmState.score;
-      document.getElementById('wm-pairs').textContent=wmState.matched.length+'/'+wmState.pairs.length+' pares';
-      fb.className='feedback-bar show ok';fb.textContent='Par correto! +100 pts';
-      if(wmState.matched.length===wmState.pairs.length){
-        document.getElementById('wm-next').className='next-btn show';
-        fb.textContent='Parabens! Voce conectou todos os pares!';
-      }
-    } else {
-      wordBtn.classList.add('wrong-match');defBtn.classList.add('wrong-match');
-      fb.className='feedback-bar show err';fb.textContent='Par errado! Tente novamente.';
-      setTimeout(()=>{wordBtn.classList.remove('wrong-match','selected');defBtn.classList.remove('wrong-match','selected');fb.className='feedback-bar';},900);
-    }
+function updateHearts() {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('h' + i).className = i <= lives ? 'heart' : 'heart lost';
   }
 }
 
-function endWordMatch(){
-  if(wmState.score>state.record)state.record=wmState.score;
-  document.getElementById('result-stars').textContent=wmState.matched.length===wmState.pairs.length?'★★★':'★★☆';
-  document.getElementById('result-title').textContent=wmState.matched.length===wmState.pairs.length?'Perfeito!':'Bom esforco!';
-  document.getElementById('result-score').textContent=wmState.score;
-  document.getElementById('result-detail').textContent=wmState.matched.length+' de '+wmState.pairs.length+' pares conectados corretamente.';
-  show('screen-result');
+function showCombo(n) {
+  const el = document.getElementById('comboBadge');
+  el.textContent = `🔥 COMBO x${n}!`;
+  el.className = 'combo-badge';
+  setTimeout(() => { el.className = 'combo-badge show'; }, 10);
+  setTimeout(() => { el.className = 'combo-badge'; }, 900);
 }
 
-initHome();
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length || lives <= 0) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  clearInterval(timer);
+  showScreen('result');
+  const pct = (correct / currentQuestions.length) * 100;
+  let trophy, title, msg;
+  if (pct >= 90) { trophy = '🏆'; title = 'Incrível! Você arrasou!'; msg = 'Uau! Dominou a História! Está mais que pronto para a prova! 🎉'; launchConfetti(); }
+  else if (pct >= 70) { trophy = '🥇'; title = 'Muito bem!'; msg = 'Ótimo resultado! Revise os que errou e vai arrasar na prova! 💪'; }
+  else if (pct >= 50) { trophy = '🥈'; title = 'Bom esforço!'; msg = 'Você está no caminho! Releia o resumo e tente de novo. 📚'; }
+  else { trophy = '📚'; title = 'Continue Tentando!'; msg = 'Não desanime! Revise o material e tente de novo. Você consegue! 🌟'; }
+  document.getElementById('resultTrophy').textContent = trophy;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalCorrect').textContent = correct;
+  document.getElementById('finalWrong').textContent = wrong;
+  document.getElementById('finalCombo').textContent = maxCombo;
+  document.getElementById('resultMsg').textContent = msg;
+  const stars = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+  const starsCount = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
+  stars.forEach((s, i) => {
+    s.textContent = i < starsCount ? '⭐' : '☆';
+    s.style.filter = i < starsCount ? 'drop-shadow(0 0 8px gold)' : 'none';
+  });
+  const hs = parseInt(localStorage.getItem('histHS') || '0');
+  if (score > hs) {
+    localStorage.setItem('histHS', score);
+    document.getElementById('highScoreVal').textContent = score;
+    document.getElementById('newRecord').className = 'new-record show';
+  } else {
+    document.getElementById('newRecord').className = 'new-record';
+  }
+}
+
+function launchConfetti() {
+  const colors = ['#ffd700','#ff6b35','#f15bb5','#00bbf9','#00e676','#ce93d8'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (Math.random() * 8 + 4) + 'px';
+      piece.style.height = (Math.random() * 8 + 4) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      piece.style.animationDelay = Math.random() * 0.5 + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showHome() {
+  clearInterval(timer);
+  const hs = parseInt(localStorage.getItem('histHS') || '0');
+  document.getElementById('highScoreVal').textContent = hs;
+  showScreen('home');
+}
+
+const hs = parseInt(localStorage.getItem('histHS') || '0');
+document.getElementById('highScoreVal').textContent = hs;
 </script>
+</body>
+</html>
