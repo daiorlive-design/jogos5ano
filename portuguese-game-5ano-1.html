@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Aventura do Português – 5º Ano</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0c29;
+  --bg2: #1a1a4e;
+  --card: #1e1b4b;
+  --gold: #ffd700;
+  --gold2: #ffaa00;
+  --green: #00e676;
+  --red: #ff5252;
+  --blue: #40c4ff;
+  --purple: #ce93d8;
+  --pink: #f48fb1;
+  --orange: #ffab40;
+  --white: #f0f0ff;
+  --gray: #7986cb;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* STARS BACKGROUND */
+.stars {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 50%, #1a0533 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, #001a3a 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 100%, #1a0a00 0%, transparent 50%),
+              #0a0a1a;
+}
+.stars::before, .stars::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, white, transparent),
+    radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 50% 10%, white, transparent),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 90% 40%, white, transparent),
+    radial-gradient(2px 2px at 20% 90%, rgba(255,215,0,0.8), transparent),
+    radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 80% 70%, white, transparent),
+    radial-gradient(2px 2px at 45% 35%, rgba(100,180,255,0.8), transparent),
+    radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.7), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.stars::after {
+  background-image:
+    radial-gradient(1px 1px at 25% 15%, white, transparent),
+    radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 75% 25%, rgba(255,215,0,0.7), transparent),
+    radial-gradient(1px 1px at 35% 85%, white, transparent),
+    radial-gradient(1px 1px at 85% 55%, rgba(200,150,255,0.8), transparent),
+    radial-gradient(1px 1px at 5% 50%, white, transparent),
+    radial-gradient(1px 1px at 65% 95%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 95% 15%, rgba(100,255,200,0.6), transparent);
+  animation-delay: 2s;
+}
+@keyframes twinkle {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* SCREENS */
+.screen {
+  position: relative; z-index: 1;
+  display: none;
+  min-height: 100vh;
+  padding: 20px;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ====== HOME SCREEN ====== */
+#home {
+  text-align: center;
+  gap: 20px;
+}
+
+.logo-area {
+  animation: floatIn 0.8s ease-out;
+}
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.game-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2em, 6vw, 3.5em);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), var(--orange), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  text-shadow: none;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.4));
+}
+
+.game-subtitle {
+  font-size: 1.1em;
+  color: var(--blue);
+  margin-top: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.hero-emoji {
+  font-size: 5em;
+  display: block;
+  margin: 10px 0;
+  animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255,215,0,0.5));
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  max-width: 700px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mode-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 22px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transition: left 0.5s;
+}
+.mode-card:hover::before { left: 100%; }
+.mode-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(255,215,0,0.5);
+  box-shadow: 0 12px 35px rgba(255,215,0,0.15), 0 0 0 1px rgba(255,215,0,0.1);
+}
+
+.mode-card .icon { font-size: 2.4em; display: block; margin-bottom: 10px; }
+.mode-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.1em; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+.mode-card p { font-size: 0.78em; color: var(--gray); font-weight: 600; }
+
+.mode-card.mod1 { border-color: rgba(255,171,64,0.3); }
+.mode-card.mod1:hover { border-color: var(--orange); box-shadow: 0 12px 35px rgba(255,171,64,0.2); }
+.mode-card.mod2 { border-color: rgba(0,230,118,0.3); }
+.mode-card.mod2:hover { border-color: var(--green); box-shadow: 0 12px 35px rgba(0,230,118,0.2); }
+.mode-card.mod3 { border-color: rgba(206,147,216,0.3); }
+.mode-card.mod3:hover { border-color: var(--purple); box-shadow: 0 12px 35px rgba(206,147,216,0.2); }
+.mode-card.full { border-color: rgba(255,215,0,0.3); }
+.mode-card.full:hover { border-color: var(--gold); box-shadow: 0 12px 35px rgba(255,215,0,0.25); }
+
+.high-score-bar {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-size: 0.9em;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ====== GAME SCREEN ====== */
+#game {
+  padding: 16px;
+  align-items: stretch;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  gap: 16px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.stat-badge {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 8px 14px;
+  text-align: center;
+  font-family: 'Baloo 2', cursive;
+  min-width: 70px;
+}
+.stat-badge .label { font-size: 0.65em; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+.stat-badge .value { font-size: 1.3em; font-weight: 800; color: var(--gold); }
+
+.progress-bar-wrap {
+  flex: 1;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  height: 10px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: 20px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(64,196,255,0.5);
+}
+
+.category-tag {
+  text-align: center;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.07);
+  color: var(--blue);
+  width: 100%;
+}
+
+/* QUESTION CARD */
+.question-card {
+  background: linear-gradient(135deg, rgba(30,27,75,0.9), rgba(15,12,41,0.9));
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 28px 24px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  backdrop-filter: blur(20px);
+  animation: cardIn 0.4s ease-out;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.q-number {
+  font-size: 0.75em;
+  color: var(--gray);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.q-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1em, 3vw, 1.2em);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+/* OPTIONS */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 13px 18px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.93em;
+  font-weight: 700;
+  color: var(--white);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.option-letter {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+  font-weight: 900;
+  flex-shrink: 0;
+  color: var(--gray);
+  transition: all 0.25s;
+}
+
+.option-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,215,0,0.4);
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(255,215,0,0.1);
+}
+.option-btn:hover:not(:disabled) .option-letter {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+.option-btn.correct {
+  background: rgba(0,230,118,0.15);
+  border-color: var(--green);
+  box-shadow: 0 0 20px rgba(0,230,118,0.2);
+  animation: correctPulse 0.5s ease;
+}
+.option-btn.correct .option-letter {
+  background: var(--green);
+  color: var(--bg);
+}
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.option-btn.wrong {
+  background: rgba(255,82,82,0.15);
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(255,82,82,0.2);
+  animation: shake 0.4s ease;
+}
+.option-btn.wrong .option-letter {
+  background: var(--red);
+  color: white;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.option-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+/* FEEDBACK */
+.feedback-box {
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 0.9em;
+  font-weight: 700;
+  margin-top: 4px;
+  display: none;
+  animation: fadeSlide 0.3s ease;
+  line-height: 1.5;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.feedback-box.correct { background: rgba(0,230,118,0.12); border: 1px solid var(--green); color: var(--green); display: block; }
+.feedback-box.wrong { background: rgba(255,82,82,0.12); border: 1px solid var(--red); color: #ff8a80; display: block; }
+
+/* TIMER */
+.timer-ring-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timer-value {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.4em;
+  font-weight: 800;
+  color: var(--blue);
+  min-width: 32px;
+  text-align: center;
+  transition: color 0.3s;
+}
+.timer-value.urgent { color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* NEXT BTN */
+.next-btn {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  border: none;
+  border-radius: 16px;
+  padding: 14px 32px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.05em;
+  font-weight: 800;
+  color: var(--bg);
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.25s;
+  display: none;
+  box-shadow: 0 6px 20px rgba(255,170,0,0.3);
+}
+.next-btn:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(255,170,0,0.4); }
+.next-btn.visible { display: block; animation: fadeSlide 0.3s ease; }
+
+/* ====== RESULT SCREEN ====== */
+#result {
+  text-align: center;
+  gap: 20px;
+}
+
+.result-trophy {
+  font-size: 5em;
+  animation: trophyIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.6));
+}
+@keyframes trophyIn {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.result-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.8em, 5vw, 2.5em);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.score-display {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 20px;
+  padding: 20px 40px;
+  display: inline-block;
+}
+.score-big {
+  font-family: 'Baloo 2', cursive;
+  font-size: 3.5em;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.score-label { font-size: 0.9em; color: var(--gray); font-weight: 700; margin-top: 4px; }
+
+.stars-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  font-size: 2.5em;
+}
+.star { animation: starPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; opacity: 0; transform: scale(0); }
+.star:nth-child(1) { animation-delay: 0.3s; }
+.star:nth-child(2) { animation-delay: 0.5s; }
+.star:nth-child(3) { animation-delay: 0.7s; }
+@keyframes starPop {
+  to { opacity: 1; transform: scale(1); }
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+.stat-pill span { color: var(--gold); font-size: 1.2em; display: block; }
+
+.result-msg {
+  font-size: 1em;
+  color: var(--gray);
+  max-width: 400px;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  border: none; border-radius: 14px; padding: 12px 28px;
+  font-family: 'Baloo 2', cursive; font-size: 1em; font-weight: 800;
+  color: var(--bg); cursor: pointer; transition: all 0.25s;
+  box-shadow: 0 6px 20px rgba(255,170,0,0.3);
+}
+.btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 28px rgba(255,170,0,0.45); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 12px 28px;
+  font-family: 'Baloo 2', cursive; font-size: 1em; font-weight: 700;
+  color: var(--white); cursor: pointer; transition: all 0.25s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 999;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* LIFE HEARTS */
+.hearts-row {
+  display: flex;
+  gap: 4px;
+}
+.heart { font-size: 1.1em; transition: all 0.3s; }
+.heart.lost { opacity: 0.2; filter: grayscale(1); transform: scale(0.8); }
+
+/* COMBO */
+.combo-badge {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: 'Baloo 2', cursive;
+  font-size: 2.5em;
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(255,215,0,0.8);
+  z-index: 100;
+  pointer-events: none;
+  transition: none;
+}
+.combo-badge.show {
+  animation: comboPop 0.8s ease forwards;
+}
+@keyframes comboPop {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  40% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  70% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+  100% { transform: translate(-50%, -70%) scale(0.8); opacity: 0; }
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+@media (max-width: 480px) {
+  .mode-grid { grid-template-columns: 1fr 1fr; }
+  .game-title { font-size: 1.8em; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<!-- COMBO BADGE -->
+<div class="combo-badge" id="comboBadge">🔥 COMBO!</div>
+
+<!-- ====== HOME ====== -->
+<div class="screen active" id="home">
+  <div class="logo-area">
+    <span class="hero-emoji">🧠</span>
+    <div class="game-title">Aventura do<br>Português</div>
+    <div class="game-subtitle">✨ 5º Ano — Quiz Interativo ✨</div>
+  </div>
+
+  <div class="mode-grid">
+    <div class="mode-card mod1" onclick="startGame('mod1')">
+      <span class="icon">😂</span>
+      <h3>Módulo 1</h3>
+      <p>Piada, Cartum<br>& Dicionário</p>
+    </div>
+    <div class="mode-card mod2" onclick="startGame('mod2')">
+      <span class="icon">🐛</span>
+      <h3>Módulo 2</h3>
+      <p>Narrativa de<br>Humor</p>
+    </div>
+    <div class="mode-card mod3" onclick="startGame('mod3')">
+      <span class="icon">⭐</span>
+      <h3>Módulo 3</h3>
+      <p>Resenha<br>Crítica</p>
+    </div>
+    <div class="mode-card full" onclick="startGame('all')">
+      <span class="icon">🎯</span>
+      <h3>Todos os Módulos</h3>
+      <p>Modo completo<br>com timer!</p>
+    </div>
+  </div>
+
+  <div class="high-score-bar" id="highScoreBar">🏆 Recorde: <span id="highScoreVal">0</span> pontos</div>
+</div>
+
+<!-- ====== GAME ====== -->
+<div class="screen" id="game">
+  <div class="game-header">
+    <div class="stat-badge">
+      <div class="label">Pontos</div>
+      <div class="value" id="scoreVal">0</div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="hearts-row" id="heartsRow">
+        <span class="heart" id="h1">❤️</span>
+        <span class="heart" id="h2">❤️</span>
+        <span class="heart" id="h3">❤️</span>
+      </div>
+    </div>
+    <div class="stat-badge timer-ring-wrap">
+      <div class="label">Tempo</div>
+      <div class="timer-value" id="timerVal">15</div>
+    </div>
+  </div>
+
+  <div class="category-tag" id="categoryTag">📚 Carregando...</div>
+
+  <div class="question-card">
+    <div class="q-number" id="qNumber">Questão 1 de 10</div>
+    <div class="q-text" id="qText">Carregando pergunta...</div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <div class="feedback-box" id="feedbackBox"></div>
+  </div>
+
+  <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Próxima Pergunta →</button>
+</div>
+
+<!-- ====== RESULT ====== -->
+<div class="screen" id="result">
+  <div class="result-trophy" id="resultTrophy">🏆</div>
+  <div class="result-title" id="resultTitle">Parabéns!</div>
+  <div class="stars-row" id="starsRow">
+    <span class="star">⭐</span>
+    <span class="star">⭐</span>
+    <span class="star">⭐</span>
+  </div>
+  <div class="score-display">
+    <div class="score-big" id="finalScore">0</div>
+    <div class="score-label">pontos conquistados</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-pill">Acertos <span id="finalCorrect">0</span></div>
+    <div class="stat-pill">Erros <span id="finalWrong">0</span></div>
+    <div class="stat-pill">Combo máx <span id="finalCombo">0</span></div>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div class="btn-row">
+    <button class="btn-primary" onclick="startGame(lastMode)">🔄 Jogar de Novo</button>
+    <button class="btn-secondary" onclick="showHome()">🏠 Início</button>
+  </div>
+</div>
+
+<script>
+// ===== QUESTIONS DATABASE =====
+const allQuestions = {
+  mod1: [
+    {
+      cat: "😂 Piada & Cartum",
+      q: "Qual é a principal finalidade de uma piada?",
+      opts: ["Informar sobre acontecimentos do dia", "Fazer rir usando duplo sentido ou situação inesperada", "Ensinar regras de gramática", "Descrever personagens com detalhes"],
+      ans: 1,
+      tip: "A piada usa o humor e a surpresa para fazer rir!"
+    },
+    {
+      cat: "😂 Piada & Cartum",
+      q: "O que é um cartum?",
+      opts: ["Um poema com rimas engraçadas", "Uma história longa com personagens fixos", "Um texto visual (imagem + texto) com humor ou crítica social", "Um tipo de dicionário ilustrado"],
+      ans: 2,
+      tip: "O cartum vem da palavra inglesa 'cartoon' e usa imagens para criar humor!"
+    },
+    {
+      cat: "😂 Piada & Cartum",
+      q: "Qual característica é comum à piada e ao cartum?",
+      opts: ["Texto muito longo", "Presença de humor", "Uso de personagens históricos", "Linguagem formal e rebuscada"],
+      ans: 1,
+      tip: "Ambos têm como objetivo provocar o riso!"
+    },
+    {
+      cat: "📖 Dicionário",
+      q: "O que significa a abreviatura 's.m.' no dicionário?",
+      opts: ["Sentido múltiplo", "Som médio", "Substantivo masculino", "Sigla mundial"],
+      ans: 2,
+      tip: "s.m. = substantivo masculino. Ex: gato (s.m.)"
+    },
+    {
+      cat: "📖 Dicionário",
+      q: "Como as palavras são organizadas no dicionário?",
+      opts: ["Por tamanho: menores primeiro", "Por importância: mais usadas primeiro", "Em ordem alfabética", "Por tema ou assunto"],
+      ans: 2,
+      tip: "O dicionário segue a ordem alfabética para facilitar a busca!"
+    },
+    {
+      cat: "📖 Dicionário",
+      q: "O que são 'acepções' de uma palavra no dicionário?",
+      opts: ["As sílabas da palavra separadas", "Os diferentes significados que a palavra pode ter", "A origem histórica da palavra", "As abreviaturas da classe gramatical"],
+      ans: 1,
+      tip: "Acepções = os vários significados de uma palavra polissêmica!"
+    },
+    {
+      cat: "🔤 Polissemia",
+      q: "O que é polissemia?",
+      opts: ["Uma palavra que não existe no dicionário", "Uma palavra com apenas um significado", "Uma palavra que tem vários significados diferentes", "Duas palavras com o mesmo significado"],
+      ans: 2,
+      tip: "Poli = muitos + semia = significados. Uma palavra, vários sentidos!"
+    },
+    {
+      cat: "🔤 Polissemia",
+      q: "A palavra 'banco' pode significar: assento OU instituição financeira. Isso é um exemplo de:",
+      opts: ["Sinônimo", "Antônimo", "Polissemia", "Onomatopeia"],
+      ans: 2,
+      tip: "Quando uma mesma palavra tem sentidos diferentes, chamamos de polissemia!"
+    },
+    {
+      cat: "🔡 Ortografia",
+      q: "Qual dessas palavras usa a letra X com som de /s/?",
+      opts: ["táxi", "xícara", "próximo", "exame"],
+      ans: 2,
+      tip: "'Próximo' → o X tem som de /s/. Em 'táxi' tem som de /ks/!"
+    },
+    {
+      cat: "🔡 Ortografia",
+      q: "Em qual das palavras a letra S representa o som /z/?",
+      opts: ["saco", "pasta", "casa", "susto"],
+      ans: 2,
+      tip: "Entre duas vogais, o S geralmente tem som de /z/. Ex: ca-SA"
+    },
+    {
+      cat: "🔡 Ortografia",
+      q: "Qual das opções está grafada CORRETAMENTE?",
+      opts: ["sezão", "sesão", "cessão", "zessão"],
+      ans: 2,
+      tip: "SESSÃO (de cinema) e SEÇÃO (parte) e CESSÃO (ceder) têm grafias diferentes!"
+    },
+  ],
+  mod2: [
+    {
+      cat: "🐛 Narrativa de Humor",
+      q: "Qual é o conflito central da narrativa 'Um Bicho-de-pé de Estimação'?",
+      opts: ["Mamede quer comprar um cachorro", "Mamede quer criar um bicho-de-pé como animal de estimação", "Mamede se perde durante uma viagem", "Mamede briga com sua mãe sobre animais"],
+      ans: 1,
+      tip: "Mamede tem um desejo incomum e absurdo: criar um bicho-de-pé!"
+    },
+    {
+      cat: "🐛 Narrativa de Humor",
+      q: "O que torna 'Um Bicho-de-pé de Estimação' uma narrativa de HUMOR?",
+      opts: ["O texto é muito curto e rima", "Usa situações absurdas, exagero e linguagem informal", "Fala sobre um animal real e perigoso", "Tem muitos personagens históricos famosos"],
+      ans: 1,
+      tip: "Narrativas de humor usam exagero, absurdo e linguagem informal!"
+    },
+    {
+      cat: "🐛 Narrativa de Humor",
+      q: "Quem escreveu 'Um Bicho-de-pé de Estimação'?",
+      opts: ["Monteiro Lobato", "Ana Maria Machado", "Sylvia Orthof", "Pedro Bandeira"],
+      ans: 2,
+      tip: "Sylvia Orthof é conhecida por suas histórias bem-humoradas para crianças!"
+    },
+    {
+      cat: "🔗 Pronomes",
+      q: "Na frase: 'Mamede chegou. Ele estava animado.' — O pronome 'ele' substitui qual palavra?",
+      opts: ["animado", "chegou", "Mamede", "estava"],
+      ans: 2,
+      tip: "O pronome substitui o substantivo para evitar repetição!"
+    },
+    {
+      cat: "🔗 Pronomes",
+      q: "Qual das opções contém pronomes POSSESSIVOS?",
+      opts: ["eu, tu, ele, ela", "este, esse, aquele, isso", "meu, teu, seu, nossa, vossa", "quem, que, cujo, onde"],
+      ans: 2,
+      tip: "Pronomes possessivos indicam posse: meu livro, tua mochila, nossa escola..."
+    },
+    {
+      cat: "🔗 Pronomes",
+      q: "Para que servem os pronomes em um texto?",
+      opts: ["Para aumentar o tamanho do texto", "Para substituir substantivos e evitar repetições", "Para indicar o tempo verbal da história", "Para descrever lugares e cenários"],
+      ans: 1,
+      tip: "Pronomes são substitutos! Evitam que a gente repita a mesma palavra várias vezes."
+    },
+    {
+      cat: "🎵 Onomatopeia & Diminutivo",
+      q: "O que é uma onomatopeia?",
+      opts: ["Uma figura de linguagem que exagera a realidade", "Uma palavra que imita um som da natureza ou de objetos", "Um tipo de verbo no passado", "Uma abreviatura usada em textos científicos"],
+      ans: 1,
+      tip: "Onomatopeia = palavra que imita sons! Ex: 'au au', 'miau', 'rec rec'"
+    },
+    {
+      cat: "🎵 Onomatopeia & Diminutivo",
+      q: "Na narrativa do bicho-de-pé, aparece 'rec, rec, rec'. Que tipo de recurso é esse?",
+      opts: ["Metáfora", "Diminutivo", "Onomatopeia", "Antônimo"],
+      ans: 2,
+      tip: "'Rec, rec' imita o som do bicho coçando — isso é onomatopeia!"
+    },
+    {
+      cat: "🎵 Onomatopeia & Diminutivo",
+      q: "A palavra 'caixinha' é um diminutivo de 'caixa'. Os diminutivos podem expressar:",
+      opts: ["Apenas tamanho pequeno de objetos", "Carinho, tamanho reduzido ou até ironia", "Somente objetos de metal", "Verbos no tempo passado"],
+      ans: 1,
+      tip: "Diminutivos têm vários usos: 'gatinho' (carinho), 'casinha' (tamanho), 'graçinha' (ironia)!"
+    },
+    {
+      cat: "✏️ Uso do Ç",
+      q: "A CEDILHA (Ç) aparece antes de quais vogais?",
+      opts: ["E e I", "A, O e U", "Todas as vogais", "Apenas antes de A"],
+      ans: 1,
+      tip: "Ç aparece antes de A, O, U: açúcar, poço, força. Antes de E e I, usa-se C: cedo, cidade."
+    },
+    {
+      cat: "✏️ Uso do Ç",
+      q: "Qual palavra usa a CEDILHA corretamente?",
+      opts: ["çidade", "çapato", "açúcar", "çelo"],
+      ans: 2,
+      tip: "A Ç NUNCA aparece no início de uma palavra em português!"
+    },
+  ],
+  mod3: [
+    {
+      cat: "⭐ Resenha Crítica",
+      q: "Qual é o objetivo principal de uma resenha crítica?",
+      opts: ["Contar uma história de ficção detalhada", "Apresentar e avaliar um produto com opinião fundamentada", "Ensinar como fabricar um produto passo a passo", "Listar as regras de um jogo"],
+      ans: 1,
+      tip: "A resenha crítica AVALIA — ela diz o que é bom e o que não é tão bom!"
+    },
+    {
+      cat: "⭐ Resenha Crítica",
+      q: "Qual desses elementos NÃO faz parte de uma resenha crítica?",
+      opts: ["Título e apresentação do produto", "Opinião com argumentos favoráveis", "Receita de como fabricar o produto", "Argumentos desfavoráveis / restrições"],
+      ans: 2,
+      tip: "Resenha avalia, não ensina a fabricar! A receita não tem vez aqui."
+    },
+    {
+      cat: "⭐ Resenha Crítica",
+      q: "Na resenha do Pop It, qual é apresentado como um BENEFÍCIO do brinquedo?",
+      opts: ["Ele é muito barato e fácil de fabricar", "Ele ajuda na concentração e desenvolvimento cognitivo", "Ele pode substituir todos os outros brinquedos", "Ele foi inventado há mais de 100 anos"],
+      ans: 1,
+      tip: "A psicóloga Cristina Borsari destaca os benefícios do Pop It para o desenvolvimento!"
+    },
+    {
+      cat: "⭐ Resenha Crítica",
+      q: "Qual é a RESTRIÇÃO mencionada sobre o Pop It na resenha?",
+      opts: ["Ele é muito caro para a maioria das famílias", "Ele não deve ser usado como substituto de outras atividades", "Ele causa dependência e vício em crianças", "Ele só funciona para crianças acima de 10 anos"],
+      ans: 1,
+      tip: "O Pop It não deve substituir outras atividades — essa é a restrição principal!"
+    },
+    {
+      cat: "📐 Concordância",
+      q: "Qual frase apresenta concordância CORRETA?",
+      opts: ["As menina brincaram felizes.", "Os gatos preto dormiu.", "As crianças felizes brincaram.", "A meninos correu rápido."],
+      ans: 2,
+      tip: "Sujeito e verbo + artigo e adjetivo devem concordar em gênero E número!"
+    },
+    {
+      cat: "📐 Concordância",
+      q: "Complete: 'O _____ _____ dormiu na varanda.' — (gato / preto)",
+      opts: ["O gatos preto dormiu", "Os gato preto dormiu", "O gato preto dormiu", "O gato pretas dormiu"],
+      ans: 2,
+      tip: "Masculino singular: O gato PRETO (não 'preta', não 'pretos')"
+    },
+    {
+      cat: "📐 Concordância",
+      q: "A concordância verbal significa que o verbo concorda com o sujeito em:",
+      opts: ["Gênero e número", "Pessoa e número", "Tempo e modo apenas", "Somente em gênero"],
+      ans: 1,
+      tip: "Verbo concorda em PESSOA (1ª, 2ª, 3ª) e NÚMERO (singular ou plural)!"
+    },
+    {
+      cat: "✏️ Por que / Porque",
+      q: "Use 'POR QUE' ou 'PORQUE': '_____ você chegou atrasado?'",
+      opts: ["Porque", "Por que", "Porquê", "Por quê que"],
+      ans: 1,
+      tip: "POR QUE = em perguntas (por qual motivo?). A frase é uma pergunta!"
+    },
+    {
+      cat: "✏️ Por que / Porque",
+      q: "Complete: 'Fui ao mercado _____ precisava de frutas.'",
+      opts: ["por que", "porquê", "porque", "por quê"],
+      ans: 2,
+      tip: "PORQUE = em respostas (equivale a 'pois', 'já que'). Está explicando o motivo!"
+    },
+    {
+      cat: "✏️ Por que / Porque",
+      q: "Qual frase usa 'por que' e 'porque' CORRETAMENTE?",
+      opts: ["Porque você não comeu? Porque não estava com fome.", "Por que você não comeu? Porque não estava com fome.", "Porque você não comeu? Por que não estava com fome.", "Por quê você não comeu? Porquê não estava com fome."],
+      ans: 1,
+      tip: "Pergunta → POR QUE. Resposta (explicação) → PORQUE."
+    },
+    {
+      cat: "⭐ Revisão Geral",
+      q: "Um texto que APRESENTA E AVALIA um produto, com opinião justificada, chama-se:",
+      opts: ["Narrativa de humor", "Piada", "Resenha crítica", "Verbete de dicionário"],
+      ans: 2,
+      tip: "Resenha crítica = apresentar + avaliar + opinar com argumentos!"
+    },
+  ]
+};
+
+// ===== GAME STATE =====
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let correct = 0;
+let wrong = 0;
+let combo = 0;
+let maxCombo = 0;
+let lives = 3;
+let timer = null;
+let timeLeft = 15;
+let lastMode = 'all';
+let answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame(mode) {
+  lastMode = mode;
+  let pool = [];
+  if (mode === 'all') {
+    pool = [...allQuestions.mod1, ...allQuestions.mod2, ...allQuestions.mod3];
+  } else {
+    pool = [...allQuestions[mode]];
+  }
+  currentQuestions = shuffle(pool).slice(0, mode === 'all' ? 15 : 10);
+  currentIndex = 0;
+  score = 0;
+  correct = 0;
+  wrong = 0;
+  combo = 0;
+  maxCombo = 0;
+  lives = 3;
+  answered = false;
+
+  showScreen('game');
+  updateHearts();
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  clearInterval(timer);
+
+  const q = currentQuestions[currentIndex];
+  const total = currentQuestions.length;
+
+  document.getElementById('qNumber').textContent = `Questão ${currentIndex + 1} de ${total}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('categoryTag').textContent = q.cat;
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('progressBar').style.width = `${(currentIndex / total) * 100}%`;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  const shuffledOpts = shuffle(q.opts.map((o, i) => ({ text: o, correct: i === q.ans })));
+
+  shuffledOpts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt.text}`;
+    btn.onclick = () => selectAnswer(btn, opt.correct, q.tip);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('feedbackBox').textContent = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = 15;
+  updateTimer();
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (!answered) timeOut();
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const el = document.getElementById('timerVal');
+  el.textContent = timeLeft;
+  el.className = timeLeft <= 5 ? 'timer-value urgent' : 'timer-value';
+}
+
+function timeOut() {
+  answered = true;
+  combo = 0;
+  wrong++;
+  loseLife();
+
+  const fb = document.getElementById('feedbackBox');
+  fb.textContent = `⏱️ Tempo esgotado! ` + currentQuestions[currentIndex].tip;
+  fb.className = 'feedback-box wrong';
+
+  document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+  document.getElementById('nextBtn').className = 'next-btn visible';
+}
+
+function selectAnswer(btn, isCorrect, tip) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
+
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedbackBox');
+
+  if (isCorrect) {
+    btn.className = 'option-btn correct';
+    combo++;
+    correct++;
+    if (combo > maxCombo) maxCombo = combo;
+    const timeBonus = Math.max(0, timeLeft * 5);
+    const comboBonus = combo > 1 ? (combo - 1) * 20 : 0;
+    const points = 100 + timeBonus + comboBonus;
+    score += points;
+
+    fb.textContent = `✅ Correto! +${points} pontos${combo > 1 ? ' 🔥 Combo x' + combo + '!' : ''}  — ${tip}`;
+    fb.className = 'feedback-box correct';
+
+    if (combo > 1) showCombo(combo);
+  } else {
+    btn.className = 'option-btn wrong';
+    combo = 0;
+    wrong++;
+    loseLife();
+    fb.textContent = `❌ Errou! ${tip}`;
+    fb.className = 'feedback-box wrong';
+  }
+
+  document.getElementById('scoreVal').textContent = score;
+  document.getElementById('nextBtn').className = 'next-btn visible';
+}
+
+function loseLife() {
+  lives--;
+  updateHearts();
+}
+
+function updateHearts() {
+  for (let i = 1; i <= 3; i++) {
+    const h = document.getElementById('h' + i);
+    h.className = i <= lives ? 'heart' : 'heart lost';
+  }
+}
+
+function showCombo(n) {
+  const el = document.getElementById('comboBadge');
+  el.textContent = `🔥 COMBO x${n}!`;
+  el.className = 'combo-badge';
+  setTimeout(() => { el.className = 'combo-badge show'; }, 10);
+  setTimeout(() => { el.className = 'combo-badge'; }, 900);
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length || lives <= 0) {
+    showResult();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showResult() {
+  clearInterval(timer);
+  showScreen('result');
+
+  const pct = (correct / currentQuestions.length) * 100;
+  let trophy, title, msg;
+
+  if (pct >= 90) {
+    trophy = '🏆'; title = 'Incrível! Você arrasou!';
+    msg = 'Uau! Você dominou o conteúdo! Está mais que pronto para a prova! 🎉';
+    launchConfetti();
+  } else if (pct >= 70) {
+    trophy = '🥇'; title = 'Muito bem!';
+    msg = 'Ótimo resultado! Revise os tópicos que errou e você vai arrasar na prova! 💪';
+  } else if (pct >= 50) {
+    trophy = '🥈'; title = 'Bom esforço!';
+    msg = 'Você está no caminho certo! Estude um pouco mais os conteúdos difíceis. 📚';
+  } else {
+    trophy = '📚'; title = 'Continue Tentando!';
+    msg = 'Não desanime! Releia o resumo e tente de novo. Você consegue! 🌟';
+  }
+
+  document.getElementById('resultTrophy').textContent = trophy;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalCorrect').textContent = correct;
+  document.getElementById('finalWrong').textContent = wrong;
+  document.getElementById('finalCombo').textContent = maxCombo;
+  document.getElementById('resultMsg').textContent = msg;
+
+  // Stars
+  const stars = document.querySelectorAll('.star');
+  const starsCount = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
+  stars.forEach((s, i) => {
+    s.textContent = i < starsCount ? '⭐' : '☆';
+    s.style.filter = i < starsCount ? 'drop-shadow(0 0 8px gold)' : 'none';
+  });
+
+  // High score
+  const hs = parseInt(localStorage.getItem('ptHS') || '0');
+  if (score > hs) {
+    localStorage.setItem('ptHS', score);
+    document.getElementById('highScoreVal').textContent = score;
+  }
+}
+
+function launchConfetti() {
+  const colors = ['#ffd700','#ff6b35','#f15bb5','#00bbf9','#00e676','#ce93d8'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (Math.random() * 8 + 4) + 'px';
+      piece.style.height = (Math.random() * 8 + 4) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      piece.style.animationDelay = Math.random() * 0.5 + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showHome() {
+  clearInterval(timer);
+  const hs = parseInt(localStorage.getItem('ptHS') || '0');
+  document.getElementById('highScoreVal').textContent = hs;
+  showScreen('home');
+}
+
+// Init
+const hs = parseInt(localStorage.getItem('ptHS') || '0');
+document.getElementById('highScoreVal').textContent = hs;
+</script>
+</body>
+</html>
