@@ -1,0 +1,428 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary)}
+#game{padding:1rem 0;min-height:500px}
+.screen{display:none}.screen.active{display:block}
+.hud{display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.hud-box{background:var(--color-background-secondary);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--color-text-secondary)}
+.hud-box span{color:var(--color-text-primary);font-weight:500}
+.lives{display:flex;gap:4px;align-items:center}
+.heart{color:#E24B4A;font-size:16px}
+.heart.empty{opacity:0.25}
+.arena{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;padding:1.5rem;margin-bottom:12px}
+.phase-badge{display:inline-block;background:#E1F5EE;color:#085041;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+.question{font-size:16px;font-weight:500;color:var(--color-text-primary);line-height:1.5;margin-bottom:18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt-btn{padding:12px 14px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:left;transition:background 0.12s,border-color 0.12s;line-height:1.4}
+.opt-btn:hover:not(:disabled){background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.opt-btn.correct{background:#E1F5EE;border-color:#1D9E75;color:#085041;font-weight:500}
+.opt-btn.wrong{background:#FCEBEB;border-color:#E24B4A;color:#791F1F}
+.opt-btn:disabled{cursor:default}
+.feedback-bar{border-radius:10px;padding:10px 14px;font-size:13px;margin-top:10px;display:none}
+.feedback-bar.show{display:block}
+.feedback-bar.ok{background:#E1F5EE;color:#085041}
+.feedback-bar.err{background:#FCEBEB;color:#791F1F}
+.timer-bar{height:6px;background:var(--color-border-tertiary);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.timer-fill{height:100%;border-radius:3px;background:#1D9E75;transition:width 0.1s linear}
+.timer-fill.warning{background:#EF9F27}
+.timer-fill.danger{background:#E24B4A}
+.next-btn{margin-top:14px;padding:10px 28px;border-radius:20px;border:none;background:#1D9E75;color:#fff;font-size:14px;font-weight:500;cursor:pointer;display:none}
+.next-btn.show{display:inline-block}
+.bonus-tag{display:inline-block;background:#FAEEDA;color:#633806;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;font-weight:500}
+.home-title{font-size:26px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;margin-top:1rem}
+.home-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem;line-height:1.6}
+.phase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:1.5rem}
+.phase-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color 0.15s}
+.phase-card:hover{border-color:var(--color-border-primary)}
+.phase-card.locked{opacity:0.45;cursor:not-allowed}
+.phase-card.completed{border-color:#1D9E75}
+.phase-icon{font-size:24px;margin-bottom:6px}
+.phase-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.phase-info{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.start-btn{padding:12px 32px;border-radius:24px;border:none;background:#1D9E75;color:#fff;font-size:15px;font-weight:500;cursor:pointer;margin-top:8px}
+.result-title{font-size:22px;font-weight:500;margin-bottom:6px}
+.result-score{font-size:48px;font-weight:500;color:#1D9E75;line-height:1}
+.result-detail{font-size:13px;color:var(--color-text-secondary);margin:8px 0 1.5rem}
+.result-stars{font-size:28px;letter-spacing:4px;margin:10px 0}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.sec-btn{padding:10px 22px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer}
+.medal{display:inline-block;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500}
+.medal.gold{background:#FAEEDA;color:#633806}
+.medal.silver{background:#F1EFE8;color:#444441}
+.medal.bronze{background:#FAECE7;color:#712B13}
+.record-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.combo-flash{position:absolute;pointer-events:none;font-size:18px;font-weight:500;color:#1D9E75;opacity:0;transition:opacity 0.3s}
+.wordmatch-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.wm-btn{padding:10px 12px;border-radius:10px;border:0.5px solid var(--color-border-secondary);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);text-align:center;transition:all 0.12s}
+.wm-btn.selected{border-color:#378ADD;background:#E6F1FB;color:#0C447C}
+.wm-btn.matched{border-color:#1D9E75;background:#E1F5EE;color:#085041;cursor:default}
+.wm-btn.wrong-match{border-color:#E24B4A;background:#FCEBEB;color:#791F1F}
+</style>
+
+<div id="game">
+
+<div id="screen-home" class="screen active">
+  <div class="home-title">Aventura na Historia</div>
+  <div class="home-sub">Escolha uma fase e mostre que voce estudou! Responda rapido para ganhar bonus de tempo.</div>
+  <div class="phase-grid" id="phase-grid"></div>
+  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <button class="start-btn" onclick="startPhase(currentPhase)">Jogar fase selecionada</button>
+    <div class="hud-box">Recorde: <span id="home-record">0</span> pts</div>
+  </div>
+</div>
+
+<div id="screen-quiz" class="screen">
+  <div class="hud">
+    <div class="hud-box">Fase: <span id="hud-phase">1</span></div>
+    <div class="hud-box">Pontos: <span id="hud-score">0</span></div>
+    <div class="hud-box">Combo: <span id="hud-combo">x1</span></div>
+    <div class="lives" id="lives-display"></div>
+    <div class="hud-box" id="hud-qnum">1/5</div>
+  </div>
+  <div class="arena">
+    <div class="phase-badge" id="phase-label">Fase 1</div>
+    <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+    <div class="question" id="q-text"></div>
+    <div class="opts" id="opts-container"></div>
+    <div class="feedback-bar" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Proxima pergunta</button>
+  </div>
+</div>
+
+<div id="screen-wordmatch" class="screen">
+  <div class="hud">
+    <div class="hud-box">Palavra x Definicao</div>
+    <div class="hud-box">Pontos: <span id="wm-score">0</span></div>
+    <div class="hud-box" id="wm-pairs">0/5 pares</div>
+  </div>
+  <div class="arena">
+    <div class="phase-badge">Desafio especial - conecte palavra e definicao!</div>
+    <div style="font-size:15px;font-weight:500;margin-bottom:12px;color:var(--color-text-primary)" id="wm-instruction">Selecione uma palavra e depois a definicao correta</div>
+    <div class="wordmatch-grid" id="wm-words"></div>
+    <div class="feedback-bar" id="wm-feedback"></div>
+    <button class="next-btn" id="wm-next" onclick="endWordMatch()">Ver resultado</button>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="arena" style="text-align:center;padding:2rem 1.5rem">
+    <div class="result-stars" id="result-stars">***</div>
+    <div class="result-title" id="result-title">Fase concluida!</div>
+    <div class="result-score" id="result-score">0</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">pontos</div>
+    <div class="result-detail" id="result-detail"></div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="start-btn" onclick="retryPhase()">Tentar de novo</button>
+      <button class="sec-btn" onclick="goHome()">Escolher outra fase</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const PHASES=[
+  {
+    id:1,name:"Pre-Historia",icon:"🦴",color:"#E1F5EE",desc:"Hominideos e nomadismo",
+    questions:[
+      {q:"Os hominideos surgiram em qual continente?",opts:["Europa","America","Africa","Asia"],a:2,exp:"Os vestigios mais antigos foram encontrados na Africa!"},
+      {q:"Como se chama o estilo de vida de quem nao tem moradia fixa?",opts:["Sedentarismo","Nomadismo","Agricultura","Comercio"],a:1,exp:"Nomades sao grupos que vivem se mudando para buscar alimentos."},
+      {q:"Qual era a principal atividade dos grupos da Pre-Historia?",opts:["Agricultura","Comercio","Caca e coleta","Pecuaria"],a:2,exp:"Caca e coleta de frutas, raizes e sementes eram as principais atividades."},
+      {q:"As cavernas eram usadas como abrigos...",opts:["Fixos e permanentes","Temporarios","Construidos pelo grupo","Exclusivos dos lideres"],a:1,exp:"As cavernas eram abrigos temporarios — os grupos estavam sempre se mudando!"},
+      {q:"A maior parte da Pre-Historia e chamada de Idade da...",opts:["Ouro","Pedra","Ferro","Bronze"],a:1,exp:"Idade da Pedra, pois as ferramentas eram feitas de pedra lascada."},
+    ]
+  },
+  {
+    id:2,name:"Homo sapiens",icon:"🧠",color:"#E6F1FB",desc:"Nossa especie e seus habitos",
+    questions:[
+      {q:"O Homo sapiens e a unica especie humana que...",opts:["Ja existiu","Ainda existe hoje","Viveu na Europa","Dominava o fogo"],a:1,exp:"Somos todos Homo sapiens — a unica especie humana sobrevivente!"},
+      {q:"Ha quantos anos os caes foram domesticados?",opts:["Ha 5 mil anos","Ha 30 mil anos","Ha 15 mil anos","Ha 1 milhao de anos"],a:2,exp:"A domesticacao dos caes ocorreu ha cerca de 15 mil anos."},
+      {q:"O que os caes ajudavam os grupos humanos a fazer?",opts:["Cultivar plantas","Transportar, proteger e cazar","Escrever registros","Controlar cheias dos rios"],a:1,exp:"Caes eram usados para transporte de cargas, protecao e auxilio na caca."},
+      {q:"Por que era impossivel sobreviver sozinho na Pre-Historia?",opts:["Por causa dos impostos","Porque os lideres proibiam","Porque a natureza e os predadores eram perigosos demais","Porque nao havia agua"],a:2,exp:"O perigo dos predadores e a dificuldade de encontrar alimentos fazia a vida em grupo indispensavel."},
+      {q:"Quais materiais os grupos da Pre-Historia usavam para fazer ferramentas?",opts:["Ferro e ouro","Pedras e madeiras","Barro e bronze","Ossos e cobre"],a:1,exp:"Pedras e madeiras eram os materiais mais usados — por isso chamamos de Idade da Pedra!"},
+    ]
+  },
+  {
+    id:3,name:"Vilarejos",icon:"🏘️",color:"#EEEDFE",desc:"Como surgiram as primeiras comunidades",
+    questions:[
+      {q:"O que fez os grupos humanos se tornarem sedentarios?",opts:["A invencao da escrita","O desenvolvimento da agricultura e pecuaria","A construcao de muralhas","A chegada do fogo"],a:1,exp:"Cultivar alimentos e criar animais permitiu que os grupos parassem de se mudar."},
+      {q:"Como eram chamados os pequenos agrupamentos de casas?",opts:["Metropoles","Imperios","Vilarejos","Piramides"],a:2,exp:"Vilarejos sao pequenos agrupamentos de casas — o comeco das cidades!"},
+      {q:"De que material eram feitas as primeiras casas dos vilarejos?",opts:["Concreto e metal","Palha e madeira, depois barro e pedra","So de pedra","So de madeira"],a:1,exp:"Primeiro palha e madeira, depois evoluiram para tijolos de barro e pedra."},
+      {q:"Quem era o lider nos primeiros vilarejos?",opts:["O mais forte do grupo","O homem mais velho","O que tinha mais comida","O mais jovem"],a:1,exp:"O homem mais velho era o chefe — ele guardava as historias e a memoria do grupo."},
+      {q:"O que os canais de irrigacao faziam nos vilarejos?",opts:["Separavam inimigos","Levavam agua do rio ate as plantacoes","Protegiam de animais","Guardavam alimentos excedentes"],a:1,exp:"Canais de irrigacao eram vias de agua construidas para regar as plantacoes distantes dos rios."},
+    ]
+  },
+  {
+    id:4,name:"Primeiras cidades",icon:"🏙️",color:"#FAECE7",desc:"Mesopotamia e Egito Antigo",
+    questions:[
+      {q:"A Mesopotamia ficava entre quais dois rios?",opts:["Nilo e Amazonas","Tigre e Eufrates","Danubio e Reno","Jordao e Nilo"],a:1,exp:"Mesopotamia significa 'terra entre rios' — os rios Tigre e Eufrates."},
+      {q:"O Rio Nilo era importante para o Egito porque:",opts:["Era um obstáculo natural","Suas cheias depositavam terra fertil nas margens","Fornecia minerais preciosos","Era usado para pesca apenas"],a:1,exp:"As cheias do Nilo depositavam humus — terra muito fertil — ideal para agricultura."},
+      {q:"Como era chamado o governante do Egito Antigo?",opts:["Rei","Presidente","Farao","Imperador"],a:2,exp:"O Farao era o governante do Egito, considerado um lider divino."},
+      {q:"O que eram os 'excedentes' nas primeiras cidades?",opts:["Comidas estragadas","Producao alem do necessario para consumo","Armas para combate","Ferramentas emprestadas"],a:1,exp:"Excedente e o que sobra apos o consumo — era usado para trocas com outros povos."},
+      {q:"Para que serviam as muralhas na Mesopotamia?",opts:["Guardar agua das chuvas","Proteger a cidade de ataques de inimigos","Separar ricos de pobres","Apoiar construcoes"],a:1,exp:"As muralhas protegiam as cidades mesopotamicas de ataques de povos vizinhos."},
+    ]
+  },
+  {
+    id:5,name:"A escrita",icon:"✍️",color:"#EAF3DE",desc:"Cuneiforme, hieroglifos e escribas",
+    questions:[
+      {q:"Como se chama a escrita criada na Mesopotamia?",opts:["Hieroglifos","Escrita cuneiforme","Alfabeto fenicio","Pictogramas maias"],a:1,exp:"A escrita cuneiforme era feita pressionando uma cunha em tabuletas de argila."},
+      {q:"Os hieroglifos eram a escrita de qual povo?",opts:["Mesopotamia","China","Roma","Egito Antigo"],a:3,exp:"Os hieroglifos eram os simbolos usados pelos egipcios para escrever."},
+      {q:"Quem eram os escribas?",opts:["Guerreiros especialistas","Sacerdotes religiosos","Pessoas especializadas em escrever","Comerciantes viajantes"],a:2,exp:"Escribas eram especialistas em escrita — uma profissao muito valorizada na antiguidade."},
+      {q:"Em que material eram feitas as tabuletas cuneiformes?",opts:["Papiro","Pedra lascada","Argila","Pele de animal"],a:2,exp:"A argila era pressionada com uma cunha para criar os simbolos cuneiformes."},
+      {q:"O papiro era usado como papel pelos:",opts:["Mesopotamios","Gregos","Chines","Egipcios"],a:3,exp:"O papiro era uma planta das margens do Nilo que os egipcios usavam para escrever."},
+    ]
+  }
+];
+
+const WORDMATCH_DATA=[
+  {word:"Nomades",def:"Grupos sem moradia fixa que se mudavam para buscar alimentos"},
+  {word:"Sedentarios",def:"Grupos que pararam de se mudar e fixaram-se em um lugar"},
+  {word:"Excedente",def:"Producao alem do necessario — permitia trocas"},
+  {word:"Escribas",def:"Especialistas em escrita nas antigas civilizacoes"},
+  {word:"Farao",def:"Governante do Egito Antigo, considerado lider divino"},
+  {word:"Mesopotamia",def:"Regiao entre os rios Tigre e Eufrates"},
+  {word:"Hieroglifos",def:"Simbolos escritos criados pelos egipcios"},
+  {word:"Pecuaria",def:"Criacao de animais domesticos para alimentacao e trabalho"},
+];
+
+let state={phase:0,qIndex:0,score:0,lives:3,combo:0,timer:null,timerVal:0,answered:false,phaseScore:0,record:0,unlockedPhases:[1,2]};
+let currentPhase=0;
+let wmState={};
+
+function initHome(){
+  const grid=document.getElementById('phase-grid');
+  grid.innerHTML='';
+  document.getElementById('home-record').textContent=state.record;
+  PHASES.forEach((p,i)=>{
+    const unlocked=state.unlockedPhases.includes(p.id);
+    const d=document.createElement('div');
+    d.className='phase-card'+(unlocked?'':' locked');
+    d.style.borderTop='3px solid '+(unlocked?'#1D9E75':'var(--color-border-tertiary)');
+    d.innerHTML=`<div class="phase-icon" style="font-size:22px">${p.icon}</div><div class="phase-name">${p.name}</div><div class="phase-info">${p.desc}</div><div class="phase-info" style="margin-top:4px;color:#1D9E75">${unlocked?'Disponivel':'Bloqueado'}</div>`;
+    if(unlocked){d.onclick=()=>{currentPhase=i;highlightPhase(i)};}
+    grid.appendChild(d);
+  });
+  const wm=document.createElement('div');
+  wm.className='phase-card';
+  wm.style.borderTop='3px solid #378ADD';
+  wm.innerHTML=`<div class="phase-icon" style="font-size:22px">🔗</div><div class="phase-name">Conectar palavras</div><div class="phase-info">Ligue palavras e definicoes</div><div class="phase-info" style="margin-top:4px;color:#378ADD">Disponivel</div>`;
+  wm.onclick=()=>{currentPhase='wm';highlightPhase('wm-extra')};
+  grid.appendChild(wm);
+  highlightPhase(currentPhase);
+}
+
+function highlightPhase(idx){
+  document.querySelectorAll('.phase-card').forEach(c=>c.style.outline='none');
+  const cards=document.querySelectorAll('.phase-card');
+  if(idx==='wm-extra'){cards[cards.length-1].style.outline='2px solid #378ADD';}
+  else if(typeof idx==='number'&&cards[idx]){cards[idx].style.outline='2px solid #1D9E75';}
+}
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function startPhase(pIdx){
+  if(pIdx==='wm'){startWordMatch();return;}
+  if(typeof pIdx!=='number')return;
+  const p=PHASES[pIdx];
+  if(!state.unlockedPhases.includes(p.id)){alert('Complete fases anteriores para desbloquear!');return;}
+  state.phase=pIdx;state.qIndex=0;state.score=0;state.lives=3;state.combo=0;state.phaseScore=0;state.answered=false;
+  show('screen-quiz');
+  loadQuestion();
+}
+
+function loadQuestion(){
+  const p=PHASES[state.phase];
+  const q=p.questions[state.qIndex];
+  state.answered=false;
+  document.getElementById('phase-label').textContent=p.icon+' '+p.name;
+  document.getElementById('hud-phase').textContent=state.phase+1;
+  document.getElementById('hud-score').textContent=state.score;
+  document.getElementById('hud-combo').textContent='x'+(state.combo+1);
+  document.getElementById('hud-qnum').textContent=(state.qIndex+1)+'/'+p.questions.length;
+  updateLives();
+  document.getElementById('q-text').textContent=q.q;
+  const fb=document.getElementById('feedback');fb.className='feedback-bar';fb.textContent='';
+  const nb=document.getElementById('next-btn');nb.className='next-btn';
+  const opts=document.getElementById('opts-container');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt-btn';b.textContent=o;
+    b.onclick=()=>answerQ(i);
+    opts.appendChild(b);
+  });
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(state.timer);
+  state.timerVal=100;
+  const fill=document.getElementById('timer-fill');
+  fill.style.width='100%';fill.className='timer-fill';
+  state.timer=setInterval(()=>{
+    state.timerVal-=1.4;
+    fill.style.width=Math.max(0,state.timerVal)+'%';
+    if(state.timerVal<40)fill.className='timer-fill warning';
+    if(state.timerVal<20)fill.className='timer-fill danger';
+    if(state.timerVal<=0){clearInterval(state.timer);timeOut();}
+  },100);
+}
+
+function timeOut(){
+  if(state.answered)return;
+  state.answered=true;state.combo=0;state.lives--;
+  updateLives();
+  const q=PHASES[state.phase].questions[state.qIndex];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add('correct');});
+  const fb=document.getElementById('feedback');fb.className='feedback-bar show err';fb.textContent='Tempo esgotado! '+q.exp;
+  document.getElementById('next-btn').className='next-btn show';
+  if(state.lives<=0){setTimeout(gameOver,1200);}
+}
+
+function answerQ(chosen){
+  if(state.answered)return;
+  state.answered=true;clearInterval(state.timer);
+  const q=PHASES[state.phase].questions[state.qIndex];
+  const btns=document.querySelectorAll('.opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  const fb=document.getElementById('feedback');
+  const timeBonus=Math.round(state.timerVal/10);
+  if(chosen===q.a){
+    btns[chosen].classList.add('correct');
+    state.combo++;
+    const pts=100+(state.combo>1?(state.combo-1)*20:0)+timeBonus;
+    state.score+=pts;state.phaseScore+=pts;
+    document.getElementById('hud-score').textContent=state.score;
+    document.getElementById('hud-combo').textContent='x'+(state.combo);
+    fb.className='feedback-bar show ok';
+    fb.textContent='Correto! +'+pts+' pts'+(timeBonus>5?' (bonus rapido!)':'')+(state.combo>1?' COMBO x'+state.combo+'!':'')+' | '+q.exp;
+  } else {
+    btns[chosen].classList.add('wrong');btns[q.a].classList.add('correct');
+    state.combo=0;state.lives--;updateLives();
+    fb.className='feedback-bar show err';fb.textContent='Errado! '+q.exp;
+    if(state.lives<=0){setTimeout(gameOver,1200);return;}
+  }
+  document.getElementById('next-btn').className='next-btn show';
+}
+
+function nextQuestion(){
+  state.qIndex++;
+  if(state.qIndex>=PHASES[state.phase].questions.length){endPhase();}
+  else{loadQuestion();}
+}
+
+function updateLives(){
+  const d=document.getElementById('lives-display');
+  d.innerHTML='';
+  for(let i=0;i<3;i++){const s=document.createElement('span');s.className='heart'+(i>=state.lives?' empty':'');s.style.fontSize='16px';s.textContent='♥';d.appendChild(s);}
+}
+
+function endPhase(){
+  clearInterval(state.timer);
+  const p=PHASES[state.phase];
+  const pct=state.phaseScore/(p.questions.length*130);
+  let stars='★★★',title='Incrivel!',msg='';
+  if(pct<0.4){stars='★☆☆';title='Continue tentando!';}
+  else if(pct<0.7){stars='★★☆';title='Bom trabalho!';}
+  else{stars='★★★';title='Incrivel!';if(!state.unlockedPhases.includes((state.phase+2)))state.unlockedPhases.push(state.phase+2);}
+  if(state.score>state.record)state.record=state.score;
+  msg=p.questions.length+' perguntas respondidas. '+p.questions.length-state.lives+' erros.';
+  document.getElementById('result-stars').textContent=stars;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-score').textContent=state.score;
+  document.getElementById('result-detail').textContent='Fase: '+p.name+' | Combos: '+state.combo;
+  show('screen-result');
+}
+
+function gameOver(){
+  clearInterval(state.timer);
+  document.getElementById('result-stars').textContent='☆☆☆';
+  document.getElementById('result-title').textContent='Game over!';
+  document.getElementById('result-score').textContent=state.score;
+  document.getElementById('result-detail').textContent='Suas vidas acabaram. Tente de novo!';
+  show('screen-result');
+}
+
+function retryPhase(){show('screen-quiz');startPhase(state.phase);}
+function goHome(){show('screen-home');initHome();}
+
+function startWordMatch(){
+  const pool=[...WORDMATCH_DATA].sort(()=>Math.random()-0.5).slice(0,5);
+  wmState={pairs:pool,selected:null,matched:[],score:0,wrongCount:0};
+  const words=pool.map(p=>p.word);
+  const defs=pool.map(p=>p.def).sort(()=>Math.random()-0.5);
+  document.getElementById('wm-score').textContent=0;
+  document.getElementById('wm-pairs').textContent='0/'+pool.length+' pares';
+  const fb=document.getElementById('wm-feedback');fb.className='feedback-bar';fb.textContent='';
+  document.getElementById('wm-next').className='next-btn';
+  const grid=document.getElementById('wm-words');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns='1fr 1fr';
+  words.forEach(w=>{
+    const b=document.createElement('button');
+    b.className='wm-btn';b.textContent=w;b.dataset.type='word';b.dataset.val=w;
+    b.onclick=()=>wmClick(b,'word',w);
+    grid.appendChild(b);
+  });
+  defs.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='wm-btn';b.style.fontSize='11px';b.textContent=d;b.dataset.type='def';b.dataset.val=d;
+    b.onclick=()=>wmClick(b,'def',d);
+    grid.appendChild(b);
+  });
+  show('screen-wordmatch');
+}
+
+function wmClick(btn,type,val){
+  if(btn.classList.contains('matched'))return;
+  const fb=document.getElementById('wm-feedback');
+  if(!wmState.selected){
+    document.querySelectorAll('.wm-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    wmState.selected={type,val,btn};
+  } else {
+    if(wmState.selected.type===type){
+      document.querySelectorAll('.wm-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      wmState.selected={type,val,btn};return;
+    }
+    const prev=wmState.selected;
+    wmState.selected=null;
+    const wordVal=type==='word'?val:prev.val;
+    const defVal=type==='def'?val:prev.val;
+    const wordBtn=type==='word'?btn:prev.btn;
+    const defBtn=type==='def'?btn:prev.btn;
+    const pair=wmState.pairs.find(p=>p.word===wordVal&&p.def===defVal);
+    if(pair){
+      wordBtn.classList.remove('selected');defBtn.classList.remove('selected');
+      wordBtn.classList.add('matched');defBtn.classList.add('matched');
+      wmState.matched.push(pair);
+      wmState.score+=100;
+      document.getElementById('wm-score').textContent=wmState.score;
+      document.getElementById('wm-pairs').textContent=wmState.matched.length+'/'+wmState.pairs.length+' pares';
+      fb.className='feedback-bar show ok';fb.textContent='Par correto! +100 pts';
+      if(wmState.matched.length===wmState.pairs.length){
+        document.getElementById('wm-next').className='next-btn show';
+        fb.textContent='Parabens! Voce conectou todos os pares!';
+      }
+    } else {
+      wordBtn.classList.add('wrong-match');defBtn.classList.add('wrong-match');
+      fb.className='feedback-bar show err';fb.textContent='Par errado! Tente novamente.';
+      setTimeout(()=>{wordBtn.classList.remove('wrong-match','selected');defBtn.classList.remove('wrong-match','selected');fb.className='feedback-bar';},900);
+    }
+  }
+}
+
+function endWordMatch(){
+  if(wmState.score>state.record)state.record=wmState.score;
+  document.getElementById('result-stars').textContent=wmState.matched.length===wmState.pairs.length?'★★★':'★★☆';
+  document.getElementById('result-title').textContent=wmState.matched.length===wmState.pairs.length?'Perfeito!':'Bom esforco!';
+  document.getElementById('result-score').textContent=wmState.score;
+  document.getElementById('result-detail').textContent=wmState.matched.length+' de '+wmState.pairs.length+' pares conectados corretamente.';
+  show('screen-result');
+}
+
+initHome();
+</script>
