@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗺️ GeoQuest — Geografia 5º Ano</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #2d9e6b;
+  --green-light: #4ecb91;
+  --green-dark: #0d3d2a;
+  --yellow: #ffd166;
+  --coral: #ef476f;
+  --blue: #118ab2;
+  --sand: #fef9ef;
+  --white: #ffffff;
+  --text: #1a2e1a;
+  --text-muted: #5a7a6a;
+  --shadow: 0 8px 32px rgba(13,61,42,0.15);
+  --radius: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e0f7ec 0%, #b8f0d4 40%, #d4f0e8 100%);
+  min-height: 100vh;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* LEAVES BACKGROUND */
+.leaves { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.leaf {
+  position: absolute; border-radius: 50% 10% 50% 10%;
+  background: rgba(46,180,110,0.12);
+  border: 1px solid rgba(46,180,110,0.2);
+  animation: floatLeaf linear infinite;
+}
+@keyframes floatLeaf {
+  0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+.screen { display: none; position: relative; z-index: 10; }
+.screen.active { display: block; }
+
+/* HOME */
+#home {
+  min-height: 100vh;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem; text-align: center;
+}
+#home.active { display: flex; }
+
+.logo-wrap { margin-bottom: 2rem; animation: dropIn 0.8s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes dropIn {
+  from { transform: translateY(-60px) scale(0.7); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.logo-emoji { font-size: 80px; display: block; filter: drop-shadow(0 8px 16px rgba(13,100,60,0.3)); }
+.logo-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(42px, 8vw, 72px);
+  color: var(--green-dark);
+  letter-spacing: 2px; line-height: 1; margin-top: 0.5rem;
+}
+.logo-title span { color: var(--green-light); }
+.logo-sub { font-size: 18px; font-weight: 700; color: var(--green); margin-top: 0.5rem; letter-spacing: 1px; }
+
+.home-card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 28px; padding: 2rem; max-width: 520px; width: 100%;
+  box-shadow: var(--shadow); border: 2px solid rgba(255,255,255,0.9);
+  animation: slideUp 0.8s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.home-card h2 { font-size: 20px; font-weight: 800; color: var(--green-dark); margin-bottom: 1.25rem; }
+
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mode-btn {
+  background: white; border: 2.5px solid transparent;
+  border-radius: 16px; padding: 1.1rem 0.75rem;
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  text-align: center;
+}
+.mode-btn:hover { transform: translateY(-4px) scale(1.03); }
+.mode-btn.quiz { border-color: var(--green-light); background: linear-gradient(135deg,#d4f7e8,#a8f0cc); }
+.mode-btn.quiz:hover { border-color: var(--green); box-shadow: 0 8px 24px rgba(78,203,145,0.3); }
+.mode-btn.match { border-color: #4ecb91; background: linear-gradient(135deg,#e0fff0,#b8f5d8); }
+.mode-btn.match:hover { border-color: #2d9e6b; box-shadow: 0 8px 24px rgba(45,158,107,0.3); }
+.mode-btn.fill { border-color: var(--yellow); background: linear-gradient(135deg,#fffbe6,#fff3b0); }
+.mode-btn.fill:hover { border-color: #e6b800; box-shadow: 0 8px 24px rgba(255,209,102,0.4); }
+.mode-btn.challenge { border-color: var(--coral); background: linear-gradient(135deg,#ffe8ee,#ffc8d5); }
+.mode-btn.challenge:hover { border-color: #c73060; box-shadow: 0 8px 24px rgba(239,71,111,0.3); }
+.mode-btn .icon { font-size: 36px; display: block; margin-bottom: 8px; }
+.mode-btn .label { font-size: 13px; font-weight: 800; color: var(--green-dark); line-height: 1.3; }
+.mode-btn .desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
+
+/* GAME HEADER */
+.game-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 2px solid rgba(46,180,110,0.2);
+  padding: 0.85rem 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.back-btn {
+  background: var(--green-light); color: white;
+  border: none; border-radius: 12px;
+  padding: 8px 14px; font-size: 18px; cursor: pointer;
+  font-family: inherit; font-weight: 700; transition: all 0.2s;
+}
+.back-btn:hover { background: var(--green); transform: scale(1.05); }
+.game-title { font-family: 'Fredoka One', cursive; font-size: 20px; color: var(--green-dark); flex: 1; }
+.score-badge {
+  background: linear-gradient(135deg,var(--yellow),#ffb700);
+  border-radius: 12px; padding: 6px 14px;
+  font-size: 16px; font-weight: 800; color: var(--green-dark);
+  box-shadow: 0 3px 12px rgba(255,183,0,0.35);
+}
+.progress-bar-wrap {
+  background: rgba(46,180,110,0.15);
+  border-radius: 99px; height: 8px; overflow: hidden; flex: 1; max-width: 200px;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg,var(--green-light),var(--green));
+  border-radius: 99px; transition: width 0.5s ease;
+}
+
+/* GAME CONTENT */
+.game-content { max-width: 700px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+/* QUIZ */
+.q-card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius); padding: 1.75rem;
+  box-shadow: var(--shadow); border: 2px solid rgba(255,255,255,0.95);
+  animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes cardIn {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.q-topic {
+  display: inline-block; padding: 4px 12px; border-radius: 99px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.topic-mapa { background: #d4f7e8; color: #0d6b3a; }
+.topic-fronteiras { background: #fff3b0; color: #7a5800; }
+.topic-linhas { background: #dde8ff; color: #2040a0; }
+.topic-zonas { background: #ffe8d8; color: #8a3010; }
+.topic-relevo { background: #f0e8d4; color: #6a4810; }
+.topic-clima { background: #e8d4f0; color: #5a2080; }
+.topic-biomas { background: #d4f0e8; color: #0d5a3a; }
+
+.q-text { font-size: 18px; font-weight: 800; color: var(--green-dark); line-height: 1.5; margin-bottom: 1.5rem; }
+
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:480px) { .options-grid { grid-template-columns: 1fr; } }
+
+.opt-btn {
+  background: white; border: 2.5px solid #e0f5ea;
+  border-radius: 14px; padding: 12px 14px;
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--text); cursor: pointer; text-align: left;
+  transition: all 0.2s; line-height: 1.4;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color: var(--green-light); background: #e8faf2;
+  transform: translateY(-2px); box-shadow: 0 4px 16px rgba(46,180,110,0.2);
+}
+.opt-letter {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: linear-gradient(135deg,var(--green-light),var(--green));
+  color: white; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.opt-btn.correct { border-color: var(--green); background: #d4fae8; }
+.opt-btn.correct .opt-letter { background: var(--green); }
+.opt-btn.wrong { border-color: var(--coral); background: #ffe8ee; }
+.opt-btn.wrong .opt-letter { background: var(--coral); }
+.opt-btn:disabled { cursor: default; }
+
+.feedback-box {
+  margin-top: 1.25rem; padding: 14px 16px;
+  border-radius: 14px; font-size: 14px; font-weight: 700;
+  line-height: 1.6; display: none;
+}
+.feedback-box.ok { background: #d4fae8; color: #0d6b3a; border: 2px solid var(--green); display: block; }
+.feedback-box.no { background: #ffe8ee; color: #8a1030; border: 2px solid var(--coral); display: block; }
+
+.next-btn {
+  margin-top: 1.25rem; width: 100%;
+  background: linear-gradient(135deg,var(--green-light),var(--green));
+  color: white; border: none; border-radius: 14px;
+  padding: 14px; font-family: 'Fredoka One', cursive;
+  font-size: 18px; cursor: pointer; letter-spacing: 1px;
+  transition: all 0.25s; box-shadow: 0 6px 20px rgba(45,158,107,0.35);
+  display: none;
+}
+.next-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(45,158,107,0.45); }
+
+/* MATCH */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.match-card {
+  background: white; border: 2.5px solid #e0f5ea;
+  border-radius: 16px; padding: 14px;
+  font-size: 13px; font-weight: 700; cursor: pointer; text-align: center;
+  min-height: 70px; display: flex; align-items: center; justify-content: center;
+  line-height: 1.4; transition: all 0.2s; color: var(--text);
+}
+.match-card.term { border-color: #b8f0cc; background: #e8faf2; }
+.match-card.def { border-color: #d4f0e8; background: #edf5f2; }
+.match-card:hover:not(.matched):not(.wrong-match) { transform: scale(1.03); box-shadow: 0 6px 20px rgba(46,180,110,0.2); }
+.match-card.selected { border-color: var(--green); background: #cceedc; transform: scale(1.04); box-shadow: 0 6px 20px rgba(45,158,107,0.3); }
+.match-card.matched { border-color: var(--green); background: #d4fae8; cursor: default; opacity: 0.7; }
+.match-card.wrong-match { border-color: var(--coral); background: #ffe8ee; animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+.match-instructions {
+  background: rgba(255,255,255,0.8); border-radius: 14px;
+  padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--green);
+  text-align: center; margin-bottom: 1rem; border: 2px solid rgba(46,180,110,0.2);
+}
+
+/* FILL */
+.fill-card {
+  background: rgba(255,255,255,0.92); border-radius: var(--radius);
+  padding: 1.75rem; box-shadow: var(--shadow); border: 2px solid rgba(255,255,255,0.95);
+}
+.fill-sentence { font-size: 17px; font-weight: 700; color: var(--green-dark); line-height: 2; margin-bottom: 1.25rem; }
+.fill-blank {
+  display: inline-block; min-width: 130px;
+  border-bottom: 3px solid var(--green-light);
+  padding: 0 8px; margin: 0 4px; font-weight: 800; color: var(--green); text-align: center;
+}
+.word-bank { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem; }
+.word-chip {
+  background: white; border: 2.5px solid #b8f0cc;
+  border-radius: 12px; padding: 8px 16px;
+  font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; color: var(--green-dark);
+}
+.word-chip:hover { background: #e8faf2; border-color: var(--green-light); transform: translateY(-2px); }
+.word-chip.used { opacity: 0.35; cursor: default; pointer-events: none; }
+
+/* CHALLENGE */
+.timer-ring { width: 80px; height: 80px; margin: 0 auto 1rem; position: relative; }
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-ring circle { fill: none; stroke-width: 6; }
+.timer-track { stroke: rgba(46,180,110,0.15); }
+.timer-fill { stroke: var(--green-light); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.timer-num {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--green-dark);
+}
+.timer-num.urgent { color: var(--coral); animation: pulse 0.5s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.15); } }
+
+/* RESULT */
+#result {
+  min-height: 100vh; display: none; flex-direction: column;
+  align-items: center; justify-content: center; padding: 2rem; text-align: center;
+}
+#result.active { display: flex; }
+.result-card {
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+  border-radius: 28px; padding: 2.5rem 2rem; max-width: 480px; width: 100%;
+  box-shadow: var(--shadow); border: 2px solid rgba(255,255,255,0.95);
+}
+.result-emoji { font-size: 72px; display: block; margin-bottom: 0.75rem; }
+.result-title { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--green-dark); margin-bottom: 0.5rem; }
+.result-score-big { font-family: 'Fredoka One', cursive; font-size: 56px; color: var(--green); line-height: 1; }
+.result-msg { font-size: 15px; color: var(--text-muted); font-weight: 700; margin-top: 0.5rem; }
+.stars { font-size: 36px; margin: 1rem 0; letter-spacing: 8px; }
+.result-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem; }
+.result-btn {
+  padding: 12px 20px; border-radius: 14px; border: none;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s;
+}
+.result-btn.primary { background: linear-gradient(135deg,var(--green-light),var(--green)); color: white; box-shadow: 0 6px 20px rgba(45,158,107,0.3); }
+.result-btn.secondary { background: white; color: var(--green); border: 2.5px solid var(--green-light); }
+.result-btn:hover { transform: translateY(-2px); }
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed; top: -10px; border-radius: 3px;
+  animation: confettiFall linear forwards; pointer-events: none; z-index: 999;
+}
+@keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+.section-label { font-size: 12px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem; }
+.counter { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="leaves" id="leaves"></div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="logo-wrap">
+    <span class="logo-emoji">🗺️</span>
+    <div class="logo-title">Geo<span>Quest</span></div>
+    <div class="logo-sub">Geografia · 5º Ano</div>
+  </div>
+  <div class="home-card">
+    <h2>Escolha como quer estudar! 🎮</h2>
+    <div class="mode-grid">
+      <button class="mode-btn quiz" onclick="startMode('quiz')">
+        <span class="icon">❓</span>
+        <div class="label">Quiz Múltipla Escolha</div>
+        <div class="desc">25 perguntas completas</div>
+      </button>
+      <button class="mode-btn match" onclick="startMode('match')">
+        <span class="icon">🔗</span>
+        <div class="label">Liga os Conceitos</div>
+        <div class="desc">Une termos e definições</div>
+      </button>
+      <button class="mode-btn fill" onclick="startMode('fill')">
+        <span class="icon">✏️</span>
+        <div class="label">Preencha as Lacunas</div>
+        <div class="desc">Complete as frases</div>
+      </button>
+      <button class="mode-btn challenge" onclick="startMode('challenge')">
+        <span class="icon">⚡</span>
+        <div class="label">Desafio Relâmpago</div>
+        <div class="desc">Contra o tempo! 15s cada</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title">❓ Quiz</div>
+    <div class="counter" id="quiz-counter">1/25</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="quiz-progress" style="width:4%"></div></div>
+    <div class="score-badge">⭐ <span id="quiz-score">0</span></div>
+  </div>
+  <div class="game-content">
+    <div class="q-card" id="quiz-card">
+      <div class="q-topic" id="q-topic"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options-grid" id="q-options"></div>
+      <div class="feedback-box" id="q-feedback"></div>
+      <button class="next-btn" id="q-next" onclick="nextQuiz()">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH SCREEN -->
+<div id="match-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title">🔗 Liga os Conceitos</div>
+    <div class="score-badge">✅ <span id="match-score">0</span>/8</div>
+  </div>
+  <div class="game-content">
+    <div class="match-instructions">Clique em um TERMO e depois na sua DEFINIÇÃO correta!</div>
+    <div class="section-label">Termos</div>
+    <div class="match-grid" id="match-terms" style="margin-bottom:1rem"></div>
+    <div class="section-label">Definições</div>
+    <div class="match-grid" id="match-defs"></div>
+  </div>
+</div>
+
+<!-- FILL SCREEN -->
+<div id="fill-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title">✏️ Preencha as Lacunas</div>
+    <div class="counter" id="fill-counter">1/12</div>
+    <div class="score-badge">⭐ <span id="fill-score">0</span></div>
+  </div>
+  <div class="game-content">
+    <div class="fill-card">
+      <div class="q-topic" id="fill-topic"></div>
+      <div class="fill-sentence" id="fill-sentence"></div>
+      <div class="section-label">Banco de palavras:</div>
+      <div class="word-bank" id="fill-words"></div>
+      <div class="feedback-box" id="fill-feedback"></div>
+      <button class="next-btn" id="fill-next" onclick="nextFill()">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHALLENGE SCREEN -->
+<div id="challenge-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <div class="game-title">⚡ Relâmpago</div>
+    <div class="counter" id="ch-counter">1/20</div>
+    <div class="score-badge">🔥 <span id="ch-score">0</span></div>
+  </div>
+  <div class="game-content">
+    <div class="timer-ring">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <circle class="timer-track" cx="40" cy="40" r="34"/>
+        <circle class="timer-fill" id="timer-circle" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-num" id="timer-num">15</div>
+    </div>
+    <div class="q-card" id="ch-card">
+      <div class="q-topic" id="ch-topic"></div>
+      <div class="q-text" id="ch-text"></div>
+      <div class="options-grid" id="ch-options"></div>
+      <div class="feedback-box" id="ch-feedback"></div>
+      <button class="next-btn" id="ch-next" onclick="nextChallenge()">Próxima →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-card">
+    <span class="result-emoji" id="r-emoji"></span>
+    <div class="result-title" id="r-title"></div>
+    <div class="stars" id="r-stars"></div>
+    <div class="result-score-big" id="r-score"></div>
+    <div class="result-msg" id="r-msg"></div>
+    <div class="result-btns">
+      <button class="result-btn primary" onclick="playAgain()">🔄 Jogar Novamente</button>
+      <button class="result-btn secondary" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* LEAVES */
+(function(){
+  const wrap=document.getElementById('leaves');
+  for(let i=0;i<16;i++){
+    const b=document.createElement('div');
+    b.className='leaf';
+    const s=Math.random()*50+20;
+    b.style.cssText=`width:${s}px;height:${s*0.6}px;left:${Math.random()*100}%;animation-duration:${Math.random()*18+10}s;animation-delay:${Math.random()*-20}s;`;
+    wrap.appendChild(b);
+  }
+})();
+
+/* QUIZ DATA — 25 perguntas */
+const quizData = [
+  // MAPA
+  {topic:'mapa',topicLabel:'🗺️ Mapa do Brasil',
+   q:'O Brasil possui quantas unidades federativas ao total?',
+   opts:['25','26','27','30'],correct:2,
+   explain:'São 26 estados + o Distrito Federal = 27 unidades federativas. Cada estado tem sua capital e sigla com duas letras.'},
+  {topic:'mapa',topicLabel:'🗺️ Mapa do Brasil',
+   q:'Em quantas regiões o Brasil é dividido?',
+   opts:['3','4','5','6'],correct:2,
+   explain:'O Brasil é dividido em 5 regiões: Norte, Nordeste, Centro-Oeste, Sudeste e Sul, cada uma com características próprias.'},
+  {topic:'mapa',topicLabel:'🗺️ Mapa do Brasil',
+   q:'Qual é a maior região do Brasil em extensão territorial?',
+   opts:['Nordeste','Centro-Oeste','Sudeste','Norte'],correct:3,
+   explain:'A Região Norte é a maior do Brasil em extensão, abrigando a maior parte da Floresta Amazônica e estados como AM, PA e RO.'},
+  {topic:'mapa',topicLabel:'🗺️ Mapa do Brasil',
+   q:'Qual é a região mais populosa do Brasil?',
+   opts:['Norte','Nordeste','Sudeste','Sul'],correct:2,
+   explain:'O Sudeste é a região mais populosa, com estados como São Paulo, Rio de Janeiro e Minas Gerais, que concentram grande parte da economia nacional.'},
+  // FRONTEIRAS
+  {topic:'fronteiras',topicLabel:'🌍 Fronteiras',
+   q:'Quantos países fazem fronteira com o Brasil?',
+   opts:['8','9','10','12'],correct:2,
+   explain:'10 países fazem fronteira com o Brasil: Argentina, Bolívia, Colômbia, Guiana, Guiana Francesa, Paraguai, Peru, Suriname, Uruguai e Venezuela!'},
+  {topic:'fronteiras',topicLabel:'🌍 Fronteiras',
+   q:'Qual país da América do Sul NÃO faz fronteira com o Brasil?',
+   opts:['Argentina','Bolívia','Chile','Uruguai'],correct:2,
+   explain:'O Chile e o Equador são os únicos países da América do Sul que não fazem fronteira com o Brasil.'},
+  {topic:'fronteiras',topicLabel:'🌍 Fronteiras',
+   q:'Como se chamam as linhas que separam dois estados brasileiros?',
+   opts:['Fronteiras','Limites','Divisas','Meridianos'],correct:2,
+   explain:'As divisas separam estados entre si. As fronteiras separam países. Os limites separam municípios.'},
+  {topic:'fronteiras',topicLabel:'🌍 Fronteiras',
+   q:'Qual oceano banha a costa do Brasil?',
+   opts:['Pacífico','Índico','Atlântico','Glacial Ártico'],correct:2,
+   explain:'O Oceano Atlântico banha toda a extensa costa leste do Brasil, que tem cerca de 7.500 km de litoral!'},
+  // LINHAS IMAGINÁRIAS
+  {topic:'linhas',topicLabel:'📏 Linhas Imaginárias',
+   q:'Qual linha imaginária divide o globo em Hemisfério Norte e Sul?',
+   opts:['Meridiano de Greenwich','Trópico de Câncer','Linha do Equador','Círculo Polar Ártico'],correct:2,
+   explain:'A Linha do Equador divide o globo terrestre em Hemisfério Norte e Hemisfério Sul. Ela passa pelo Brasil!'},
+  {topic:'linhas',topicLabel:'📏 Linhas Imaginárias',
+   q:'Quais linhas imaginárias passam pelo território brasileiro?',
+   opts:['Trópico de Câncer e Greenwich','Equador e Trópico de Capricórnio','Círculos Polares','Apenas o Equador'],correct:1,
+   explain:'A Linha do Equador e o Trópico de Capricórnio passam pelo Brasil! Isso explica porque o país tem clima predominantemente quente.'},
+  {topic:'linhas',topicLabel:'📏 Linhas Imaginárias',
+   q:'O que são paralelos?',
+   opts:['Linhas verticais do globo','Linhas diagonais','Linhas horizontais do globo','Linhas de altitude'],correct:2,
+   explain:'Paralelos são linhas horizontais que cortam o globo. Meridianos são as linhas verticais. Juntos, eles formam a rede geográfica de coordenadas!'},
+  {topic:'linhas',topicLabel:'📏 Linhas Imaginárias',
+   q:'O Meridiano de Greenwich divide o globo em quais hemisférios?',
+   opts:['Norte e Sul','Leste e Oeste','Superior e Inferior','Tropical e Polar'],correct:1,
+   explain:'O Meridiano de Greenwich (0°) divide o globo em Hemisfério Oriental (leste) e Hemisfério Ocidental (oeste). O Brasil está no Hemisfério Ocidental!'},
+  // ZONAS TÉRMICAS
+  {topic:'zonas',topicLabel:'🌡️ Zonas Térmicas',
+   q:'Qual zona térmica é a mais quente do planeta?',
+   opts:['Zona Polar','Zona Temperada','Zona Tropical','Zona Subtropical'],correct:2,
+   explain:'A Zona Tropical (ou intertropical), entre os dois Trópicos, é a mais quente. Os raios solares chegam quase perpendiculares, concentrando mais calor.'},
+  {topic:'zonas',topicLabel:'🌡️ Zonas Térmicas',
+   q:'Em qual zona térmica o Brasil está localizado principalmente?',
+   opts:['Polar','Temperada','Tropical','Polar e Temperada'],correct:2,
+   explain:'O Brasil fica principalmente na Zona Tropical, por isso tem temperaturas elevadas. O Sul do país, abaixo do Trópico de Capricórnio, tem clima subtropical.'},
+  {topic:'zonas',topicLabel:'🌡️ Zonas Térmicas',
+   q:'Por que a Zona Polar é muito mais fria que a Tropical?',
+   opts:['Fica mais longe do Sol','Os raios solares chegam muito inclinados, espalhando o calor','Tem menos ventos','Fica abaixo do nível do mar'],correct:1,
+   explain:'Nas zonas polares, os raios solares chegam muito inclinados, espalhando o calor numa área maior e aquecendo menos. Na zona tropical, chegam mais diretos, concentrando o calor!'},
+  // RELEVO
+  {topic:'relevo',topicLabel:'⛰️ Relevo',
+   q:'Qual forma de relevo tem altitude acima de 300m e pode ter chapadas e serras?',
+   opts:['Planície','Depressão','Planalto','Vale'],correct:2,
+   explain:'O Planalto tem altitude acima de 300m, superfície plana ou ondulada. Pode ser plana (chapada) ou com picos e desníveis (serra).'},
+  {topic:'relevo',topicLabel:'⛰️ Relevo',
+   q:'A Planície tem altitude máxima de:',
+   opts:['500 metros','300 metros','200 metros','100 metros'],correct:3,
+   explain:'As Planícies têm altitude de até 100 metros e bordas suaves. São terrenos baixos e planos, como a Planície Amazônica e o Pantanal Mato-Grossense.'},
+  {topic:'relevo',topicLabel:'⛰️ Relevo',
+   q:'Como se chama a borda íngreme e abrupta de um planalto?',
+   opts:['Chapada','Escarpa','Serra','Depressão'],correct:1,
+   explain:'A Escarpa é a borda ou descida acentuada do planalto. É como um "degrau" que separa o planalto das regiões mais baixas.'},
+  // CLIMA
+  {topic:'clima',topicLabel:'🌤️ Clima',
+   q:'Qual clima apresenta 4 estações bem definidas e invernos mais frios?',
+   opts:['Equatorial','Tropical','Subtropical','Semiárido'],correct:2,
+   explain:'O clima Subtropical ocorre principalmente no Sul do Brasil, com 4 estações bem definidas. O inverno pode ter geada e até neve nas partes mais altas!'},
+  {topic:'clima',topicLabel:'🌤️ Clima',
+   q:'No clima Equatorial da Amazônia, como são as chuvas?',
+   opts:['Escassas, só no inverno','Abundantes o ano todo','Concentradas no verão','Quase inexistentes'],correct:1,
+   explain:'No clima Equatorial, as chuvas são abundantes durante todo o ano. A Amazônia recebe entre 2.000 e 3.500 mm de chuva por ano, sendo uma das regiões mais úmidas do mundo!'},
+  {topic:'clima',topicLabel:'🌤️ Clima',
+   q:'O clima Semiárido, típico do Nordeste, tem chuvas concentradas em quantos meses?',
+   opts:['6 meses','8 meses','3 meses','12 meses'],correct:2,
+   explain:'No Semiárido nordestino, as chuvas são escassas e concentradas em apenas 3 meses do ano. O restante do tempo é muito seco, com temperaturas elevadas.'},
+  // BIOMAS
+  {topic:'biomas',topicLabel:'🌿 Biomas',
+   q:'Qual bioma predomina no Nordeste, adaptado ao clima semiárido?',
+   opts:['Cerrado','Caatinga','Pantanal','Campos'],correct:1,
+   explain:'A Caatinga predomina no Nordeste. É o único bioma exclusivamente brasileiro! Suas plantas e animais são adaptados ao calor e à seca, como os cactos e a jurema.'},
+  {topic:'biomas',topicLabel:'🌿 Biomas',
+   q:'Qual é o maior bioma do Brasil?',
+   opts:['Cerrado','Mata Atlântica','Floresta Amazônica','Pantanal'],correct:2,
+   explain:'A Floresta Amazônica é o maior bioma do Brasil e a maior floresta tropical do mundo! Abriga mais de 10% de todas as espécies de animais e plantas do planeta.'},
+  {topic:'biomas',topicLabel:'🌿 Biomas',
+   q:'A Mata de Araucárias (Pinheiro-do-Paraná) é típica de qual região?',
+   opts:['Norte','Nordeste','Sudeste','Sul'],correct:3,
+   explain:'A Mata de Araucárias predomina na Região Sul, onde o clima subtropical mais frio favorece os pinheiros. O Pinheiro-do-Paraná é o símbolo do estado do Paraná!'},
+  {topic:'biomas',topicLabel:'🌿 Biomas',
+   q:'Qual bioma fica no Centro-Oeste e é a maior planície alagada do mundo?',
+   opts:['Cerrado','Caatinga','Pantanal','Campos'],correct:2,
+   explain:'O Pantanal, localizado principalmente no Mato Grosso do Sul e Mato Grosso, é a maior planície alagada do mundo e um dos ecossistemas mais ricos em biodiversidade!'},
+];
+
+/* MATCH DATA — 8 pares */
+const matchData = [
+  {term:'Divisas', def:'Linhas que separam estados'},
+  {term:'Fronteiras', def:'Linhas que separam países'},
+  {term:'Planalto', def:'Relevo acima de 300m de altitude'},
+  {term:'Caatinga', def:'Bioma exclusivo do semiárido nordestino'},
+  {term:'Linha do Equador', def:'Divide o globo em Norte e Sul'},
+  {term:'Pantanal', def:'Maior planície alagada do mundo'},
+  {term:'Zona Tropical', def:'A faixa térmica mais quente da Terra'},
+  {term:'Floresta Amazônica', def:'Maior floresta tropical do mundo'},
+];
+
+/* FILL DATA — 12 frases */
+const fillData = [
+  {topic:'mapa', topicLabel:'🗺️ Mapa',
+   before:'O Brasil possui', after:'unidades federativas, sendo 26 estados e o Distrito Federal.',
+   answer:'27', options:['25','27','30','20']},
+  {topic:'fronteiras', topicLabel:'🌍 Fronteiras',
+   before:'As linhas que separam dois estados brasileiros são chamadas de', after:'.',
+   answer:'divisas', options:['fronteiras','divisas','limites','meridianos']},
+  {topic:'fronteiras', topicLabel:'🌍 Fronteiras',
+   before:'O Brasil faz fronteira com', after:'países da América do Sul.',
+   answer:'10', options:['8','9','10','12']},
+  {topic:'linhas', topicLabel:'📏 Linhas',
+   before:'A Linha do', after:'divide o globo terrestre em Hemisfério Norte e Sul.',
+   answer:'Equador', options:['Equador','Greenwich','Câncer','Capricórnio']},
+  {topic:'linhas', topicLabel:'📏 Linhas',
+   before:'Linhas horizontais do globo são chamadas de', after:', enquanto as verticais são os meridianos.',
+   answer:'paralelos', options:['meridianos','paralelos','fronteiras','trópicos']},
+  {topic:'zonas', topicLabel:'🌡️ Zonas',
+   before:'A zona térmica mais quente do planeta é a zona', after:', localizada entre os dois Trópicos.',
+   answer:'tropical', options:['polar','temperada','tropical','subtropical']},
+  {topic:'relevo', topicLabel:'⛰️ Relevo',
+   before:'A borda íngreme e abrupta de um planalto é chamada de', after:'.',
+   answer:'escarpa', options:['chapada','escarpa','serra','planície']},
+  {topic:'relevo', topicLabel:'⛰️ Relevo',
+   before:'O relevo brasileiro é agrupado em três formas: planaltos, planícies e', after:'.',
+   answer:'depressões', options:['vales','montanhas','depressões','morros']},
+  {topic:'clima', topicLabel:'🌤️ Clima',
+   before:'O clima', after:'ocorre no Sul do Brasil, com 4 estações bem definidas.',
+   answer:'subtropical', options:['equatorial','tropical','subtropical','semiárido']},
+  {topic:'clima', topicLabel:'🌤️ Clima',
+   before:'No Nordeste, o clima', after:'apresenta chuvas escassas concentradas em apenas 3 meses.',
+   answer:'semiárido', options:['equatorial','subtropical','tropical','semiárido']},
+  {topic:'biomas', topicLabel:'🌿 Biomas',
+   before:'A', after:'é o único bioma exclusivamente brasileiro, típico do Nordeste.',
+   answer:'Caatinga', options:['Caatinga','Cerrado','Mata Atlântica','Pantanal']},
+  {topic:'biomas', topicLabel:'🌿 Biomas',
+   before:'O', after:'é a maior planície alagada do mundo, localizado no Centro-Oeste.',
+   answer:'Pantanal', options:['Cerrado','Pantanal','Campos','Pantanal Amazônico']},
+];
+
+/* STATE */
+let state = {
+  mode: null, questions: [], currentQ: 0, total: 0,
+  score: 0, answered: false, timerInterval: null, timeLeft: 15
+};
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome(){ clearInterval(state.timerInterval); showScreen('home'); }
+
+function playAgain(){ startMode(state.mode); }
+
+function startMode(mode){
+  state.mode = mode;
+  state.score = 0;
+  state.currentQ = 0;
+  state.answered = false;
+  clearInterval(state.timerInterval);
+
+  if(mode==='quiz'){
+    state.questions = shuffle(quizData).slice(0,25);
+    state.total = state.questions.length;
+    showScreen('quiz-screen');
+    renderQuiz();
+  } else if(mode==='match'){
+    state.total = matchData.length;
+    state.score = 0;
+    showScreen('match-screen');
+    renderMatch();
+  } else if(mode==='fill'){
+    state.questions = shuffle(fillData);
+    state.total = state.questions.length;
+    showScreen('fill-screen');
+    renderFill();
+  } else if(mode==='challenge'){
+    state.questions = shuffle(quizData);
+    state.total = state.questions.length;
+    showScreen('challenge-screen');
+    renderChallenge();
+  }
+}
+
+/* QUIZ */
+function renderQuiz(){
+  const q = state.questions[state.currentQ];
+  state.answered = false;
+  document.getElementById('quiz-counter').textContent = `${state.currentQ+1}/${state.total}`;
+  document.getElementById('quiz-progress').style.width = ((state.currentQ+1)/state.total*100)+'%';
+  document.getElementById('quiz-score').textContent = state.score;
+
+  const topicEl = document.getElementById('q-topic');
+  topicEl.textContent = q.topicLabel;
+  topicEl.className = 'q-topic topic-'+q.topic;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').className = 'feedback-box';
+  document.getElementById('q-next').style.display = 'none';
+
+  const letters = ['A','B','C','D'];
+  document.getElementById('q-options').innerHTML = q.opts.map((opt,i)=>
+    `<button class="opt-btn" onclick="answerQuiz(${i})" id="qopt${i}">
+      <span class="opt-letter">${letters[i]}</span><span>${opt}</span>
+    </button>`
+  ).join('');
+
+  const card = document.getElementById('quiz-card');
+  card.style.animation='none'; void card.offsetWidth;
+  card.style.animation='cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+}
+
+function answerQuiz(chosen){
+  if(state.answered) return;
+  state.answered = true;
+  const q = state.questions[state.currentQ];
+  const btns = document.querySelectorAll('#q-options .opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.correct].classList.add('correct');
+  const fb = document.getElementById('q-feedback');
+  if(chosen===q.correct){
+    state.score++;
+    document.getElementById('quiz-score').textContent = state.score;
+    btns[chosen].classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.textContent='✅ Correto! Muito bem! — '+q.explain;
+  } else {
+    btns[chosen].classList.add('wrong');
+    fb.className='feedback-box no';
+    fb.textContent='❌ Ops! — '+q.explain;
+  }
+  document.getElementById('q-next').style.display='block';
+}
+
+function nextQuiz(){
+  state.currentQ++;
+  if(state.currentQ>=state.total) showResult('quiz');
+  else renderQuiz();
+}
+
+/* MATCH */
+let matchSelectedTerm=null, matchSelectedDef=null;
+
+function renderMatch(){
+  document.getElementById('match-score').textContent='0';
+  state.score=0;
+  matchSelectedTerm=null; matchSelectedDef=null;
+
+  const pairs = shuffle(matchData);
+  const terms = shuffle(pairs.map(p=>p.term));
+  const defs = shuffle(pairs.map(p=>p.def));
+
+  document.getElementById('match-terms').innerHTML = terms.map(t=>
+    `<div class="match-card term" id="term-${t.replace(/\s/g,'_')}" onclick="selectTerm('${t.replace(/'/g,"\\'")}',this)">${t}</div>`
+  ).join('');
+  document.getElementById('match-defs').innerHTML = defs.map(d=>
+    `<div class="match-card def" id="def-${d.replace(/\s/g,'_').substring(0,20)}" onclick="selectDef('${d.replace(/'/g,"\\'")}',this)">${d}</div>`
+  ).join('');
+}
+
+function selectTerm(term,el){
+  if(el.classList.contains('matched')) return;
+  document.querySelectorAll('.match-card.term').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  matchSelectedTerm={term,el};
+  if(matchSelectedDef) checkMatch();
+}
+
+function selectDef(def,el){
+  if(el.classList.contains('matched')) return;
+  document.querySelectorAll('.match-card.def').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  matchSelectedDef={def,el};
+  if(matchSelectedTerm) checkMatch();
+}
+
+function checkMatch(){
+  const pair = matchData.find(p=>p.term===matchSelectedTerm.term);
+  if(pair && pair.def===matchSelectedDef.def){
+    matchSelectedTerm.el.classList.remove('selected');
+    matchSelectedDef.el.classList.remove('selected');
+    matchSelectedTerm.el.classList.add('matched');
+    matchSelectedDef.el.classList.add('matched');
+    state.score++;
+    document.getElementById('match-score').textContent=state.score;
+    matchSelectedTerm=null; matchSelectedDef=null;
+    if(state.score===state.total){
+      setTimeout(()=>showResult('match'),600);
+    }
+  } else {
+    matchSelectedTerm.el.classList.add('wrong-match');
+    matchSelectedDef.el.classList.add('wrong-match');
+    setTimeout(()=>{
+      matchSelectedTerm.el.classList.remove('selected','wrong-match');
+      matchSelectedDef.el.classList.remove('selected','wrong-match');
+      matchSelectedTerm=null; matchSelectedDef=null;
+    },600);
+  }
+}
+
+/* FILL */
+function renderFill(){
+  const q = state.questions[state.currentQ];
+  state.answered = false;
+  document.getElementById('fill-counter').textContent=`${state.currentQ+1}/${state.total}`;
+  document.getElementById('fill-score').textContent=state.score;
+
+  const topicEl=document.getElementById('fill-topic');
+  topicEl.textContent=q.topicLabel;
+  topicEl.className='q-topic topic-'+q.topic;
+
+  document.getElementById('fill-sentence').innerHTML=
+    `${q.before} <span class="fill-blank" id="fill-blank">___</span> ${q.after}`;
+
+  const words=shuffle(q.options);
+  document.getElementById('fill-words').innerHTML=words.map(w=>
+    `<button class="word-chip" onclick="chooseFill('${w}','${q.answer}')">${w}</button>`
+  ).join('');
+
+  document.getElementById('fill-feedback').className='feedback-box';
+  document.getElementById('fill-next').style.display='none';
+}
+
+function chooseFill(word,answer){
+  if(state.answered) return;
+  state.answered=true;
+  document.querySelectorAll('.word-chip').forEach(c=>{ c.classList.add('used'); if(c.textContent===word) c.classList.remove('used'); });
+  document.getElementById('fill-blank').textContent=word;
+  const fb=document.getElementById('fill-feedback');
+  if(word===answer){
+    state.score++;
+    document.getElementById('fill-score').textContent=state.score;
+    document.getElementById('fill-blank').style.color='var(--green)';
+    fb.className='feedback-box ok';
+    fb.textContent='✅ Correto! Muito bem!';
+  } else {
+    document.getElementById('fill-blank').style.color='var(--coral)';
+    fb.className='feedback-box no';
+    fb.textContent=`❌ A resposta correta era: "${answer}"`;
+  }
+  document.getElementById('fill-next').style.display='block';
+}
+
+function nextFill(){
+  state.currentQ++;
+  if(state.currentQ>=state.total) showResult('fill');
+  else renderFill();
+}
+
+/* CHALLENGE */
+const TIMER_MAX=15, CIRCUMFERENCE=213.6;
+
+function renderChallenge(){
+  const q=state.questions[state.currentQ];
+  state.answered=false;
+  clearInterval(state.timerInterval);
+  state.timeLeft=TIMER_MAX;
+
+  document.getElementById('ch-counter').textContent=`${state.currentQ+1}/${state.total}`;
+  document.getElementById('ch-score').textContent=state.score;
+
+  const topicEl=document.getElementById('ch-topic');
+  topicEl.textContent=q.topicLabel;
+  topicEl.className='q-topic topic-'+q.topic;
+  document.getElementById('ch-text').textContent=q.q;
+  document.getElementById('ch-feedback').className='feedback-box';
+  document.getElementById('ch-next').style.display='none';
+
+  const letters=['A','B','C','D'];
+  document.getElementById('ch-options').innerHTML=q.opts.map((opt,i)=>
+    `<button class="opt-btn" onclick="answerChallenge(${i})" id="chopt${i}">
+      <span class="opt-letter">${letters[i]}</span><span>${opt}</span>
+    </button>`
+  ).join('');
+
+  const card=document.getElementById('ch-card');
+  card.style.animation='none'; void card.offsetWidth;
+  card.style.animation='cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both';
+
+  updateTimerDisplay();
+  state.timerInterval=setInterval(()=>{
+    state.timeLeft--;
+    updateTimerDisplay();
+    if(state.timeLeft<=0){ clearInterval(state.timerInterval); if(!state.answered) timeOut(); }
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const pct=state.timeLeft/TIMER_MAX;
+  document.getElementById('timer-circle').style.strokeDashoffset=CIRCUMFERENCE*(1-pct);
+  document.getElementById('timer-num').textContent=state.timeLeft;
+  if(state.timeLeft<=5){
+    document.getElementById('timer-circle').style.stroke='var(--coral)';
+    document.getElementById('timer-num').className='timer-num urgent';
+  } else {
+    document.getElementById('timer-circle').style.stroke='var(--green-light)';
+    document.getElementById('timer-num').className='timer-num';
+  }
+}
+
+function answerChallenge(chosen){
+  if(state.answered) return;
+  state.answered=true;
+  clearInterval(state.timerInterval);
+  const q=state.questions[state.currentQ];
+  const btns=document.querySelectorAll('#ch-options .opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.correct].classList.add('correct');
+  const fb=document.getElementById('ch-feedback');
+  const timeBonus=state.timeLeft>=10?2:1;
+  if(chosen===q.correct){
+    state.score+=timeBonus;
+    document.getElementById('ch-score').textContent=state.score;
+    btns[chosen].classList.add('correct');
+    fb.className='feedback-box ok';
+    fb.textContent=`✅ Correto! +${timeBonus} ponto${timeBonus>1?'s':''} (${state.timeLeft}s restantes)`;
+  } else {
+    btns[chosen].classList.add('wrong');
+    fb.className='feedback-box no';
+    fb.textContent='❌ Errado. '+q.explain;
+  }
+  document.getElementById('ch-next').style.display='block';
+}
+
+function timeOut(){
+  state.answered=true;
+  const q=state.questions[state.currentQ];
+  const btns=document.querySelectorAll('#ch-options .opt-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.correct].classList.add('correct');
+  const fb=document.getElementById('ch-feedback');
+  fb.className='feedback-box no';
+  fb.textContent='⏰ Tempo esgotado! '+q.explain;
+  document.getElementById('ch-next').style.display='block';
+}
+
+function nextChallenge(){
+  state.currentQ++;
+  if(state.currentQ>=state.total) showResult('challenge');
+  else renderChallenge();
+}
+
+/* RESULT */
+function showResult(mode){
+  clearInterval(state.timerInterval);
+  const maxScore=mode==='challenge'?state.total*2:state.total;
+  const pct=mode==='match'?(state.score/state.total*100):(state.score/maxScore*100);
+
+  let emoji,title,msg,stars;
+  if(pct===100){emoji='🏆';title='Perfeito!';stars='⭐⭐⭐';msg='Incrível! Você acertou tudo! Está pronto para a prova!';}
+  else if(pct>=75){emoji='🌟';title='Muito bem!';stars='⭐⭐';msg='Excelente trabalho! Estude mais um pouquinho e vai arrasar!';}
+  else if(pct>=50){emoji='👏';title='Bom trabalho!';stars='⭐';msg='Você está no caminho certo! Continue praticando!';}
+  else{emoji='💪';title='Continue tentando!';stars='⭐';msg='Não desista! Revise o material e tente de novo. Você consegue!';}
+
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-title').textContent=title;
+  document.getElementById('r-stars').textContent=stars;
+  document.getElementById('r-msg').textContent=msg;
+  document.getElementById('r-score').textContent=mode==='challenge'?`${state.score} pts`:`${state.score}/${state.total}`;
+
+  showScreen('result');
+  if(pct>=75) launchConfetti();
+}
+
+function launchConfetti(){
+  const colors=['#2d9e6b','#4ecb91','#ffd166','#ef476f','#118ab2','#ffffff'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti-piece';
+      const size=Math.random()*10+6;
+      c.style.cssText=`left:${Math.random()*100}%;width:${size}px;height:${size*(Math.random()*1.5+0.5)}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*0.5}s;transform:rotate(${Math.random()*360}deg);`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3500);
+    },i*30);
+  }
+}
+</script>
+</body>
+</html>
