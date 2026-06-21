@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>A Viagem do Canguru — Aprenda Inglês</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#5FB4D9;
+    --sky-deep:#3D8FB5;
+    --orange:#F2884B;
+    --orange-deep:#D9692F;
+    --cream:#FFF7EA;
+    --cream-deep:#F7E9CF;
+    --leaf:#7AAE6B;
+    --leaf-deep:#5C8C4E;
+    --grape:#9B6FBF;
+    --earth:#6B4A3A;
+    --ink:#3A2E26;
+    --white:#FFFFFF;
+    --shadow: 0 8px 0 rgba(0,0,0,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', sans-serif;
+    background: linear-gradient(180deg, var(--sky) 0%, #8FCBE3 38%, var(--cream) 38%, var(--cream) 100%);
+    min-height:100vh;
+    color:var(--ink);
+    overflow-x:hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,h2,h3,.display{font-family:'Baloo 2', sans-serif;}
+
+  /* ---------- clouds ---------- */
+  .cloud{position:absolute; background:#fff; border-radius:50%; opacity:.85; filter:drop-shadow(0 4px 0 rgba(0,0,0,.04));}
+  .cloud::before, .cloud::after{content:""; position:absolute; background:#fff; border-radius:50%;}
+
+  /* ---------- top bar ---------- */
+  #topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px;
+    background:rgba(255,255,255,0.0);
+  }
+  #topbar .pill{
+    background:var(--white);
+    border-radius:999px;
+    padding:8px 14px;
+    box-shadow:var(--shadow);
+    font-weight:800;
+    display:flex; align-items:center; gap:8px;
+    font-size:15px;
+  }
+  #homeBtn{
+    background:var(--orange); color:#fff; border:none; border-radius:999px;
+    width:42px; height:42px; font-size:20px; cursor:pointer; box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  #homeBtn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.12);}
+  #soundToggle{
+    margin-left:auto;
+    background:var(--white); border:none; border-radius:999px;
+    width:42px; height:42px; font-size:18px; cursor:pointer; box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #starCount{color:var(--orange-deep);}
+
+  .screen{display:none; padding: 6px 14px 60px;}
+  .screen.active{display:block;}
+
+  /* ---------- HOME / MAP ---------- */
+  #home .hero{
+    text-align:center;
+    padding: 6px 8px 18px;
+  }
+  #home .hero .roo{
+    font-size:64px;
+    display:inline-block;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-10px) rotate(2deg);}}
+  #home .hero h1{
+    font-size:26px; margin:6px 0 2px; color:var(--earth);
+    text-shadow: 2px 2px 0 #fff;
+  }
+  #home .hero p{margin:0; font-weight:700; color:var(--sky-deep); font-size:14px;}
+
+  .trail{
+    position:relative;
+    max-width:480px;
+    margin:0 auto;
+    padding: 10px 0 30px;
+  }
+  .trail svg.path{position:absolute; top:0; left:0; width:100%; height:100%; z-index:0;}
+  .island{
+    position:relative; z-index:2;
+    display:flex; align-items:center; gap:14px;
+    margin: -6px 0;
+    padding: 10px;
+  }
+  .island:nth-child(even){flex-direction:row-reverse; text-align:right;}
+  .island-badge{
+    width:74px; height:74px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px; flex-shrink:0;
+    border: 4px solid #fff;
+    box-shadow: var(--shadow);
+    cursor:pointer;
+    transition: transform .15s ease;
+    position:relative;
+  }
+  .island-badge:active{transform:scale(0.92);}
+  .island-badge.locked{
+    background:#cfc6ba; filter:grayscale(0.4); cursor:not-allowed;
+  }
+  .island-badge.locked:active{transform:none;}
+  .island-card{
+    flex:1;
+    background:var(--white);
+    border-radius:18px;
+    padding:10px 14px;
+    box-shadow: var(--shadow);
+  }
+  .island-card h3{margin:0 0 2px; font-size:16px; color:var(--earth);}
+  .island-card p{margin:0; font-size:12.5px; color:#7a6f64; font-weight:700;}
+  .island-card .stars{font-size:13px; margin-top:4px; color:var(--orange-deep);}
+  .lockmsg{font-size:11px; color:#a39a8e; font-weight:700;}
+
+  /* unit divider */
+  .unit-divider{
+    text-align:center; margin: 22px 0 8px; position:relative; z-index:2;
+  }
+  .unit-divider span{
+    background:var(--leaf); color:#fff; font-weight:800; font-family:'Baloo 2';
+    padding:6px 18px; border-radius:999px; font-size:14px; box-shadow:var(--shadow);
+  }
+
+  /* ---------- LESSON SCREEN ---------- */
+  #lesson{
+    max-width:520px; margin:0 auto;
+  }
+  .lesson-header{
+    text-align:center; margin-bottom:6px;
+  }
+  .lesson-header h2{margin:4px 0 0; font-size:20px; color:var(--earth);}
+  .progress-wrap{
+    background:#e8ddca; border-radius:999px; height:14px; max-width:480px; margin:8px auto 14px;
+    overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,.1);
+  }
+  .progress-bar{
+    height:100%; background:linear-gradient(90deg,var(--leaf),var(--leaf-deep));
+    border-radius:999px; width:0%; transition: width .4s ease;
+  }
+
+  .card{
+    background:var(--white);
+    border-radius:22px;
+    box-shadow: 0 10px 0 rgba(0,0,0,.1);
+    padding:22px 18px;
+    margin: 0 4px 16px;
+    position:relative;
+    animation: pop .35s ease;
+  }
+  @keyframes pop{from{opacity:0; transform:scale(.92) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
+
+  .guide{
+    display:flex; align-items:flex-start; gap:10px; margin-bottom:16px;
+  }
+  .guide .roo-mini{font-size:38px; flex-shrink:0;}
+  .guide .bubble{
+    background:var(--cream-deep);
+    border-radius:16px;
+    padding:10px 14px;
+    font-weight:800;
+    font-size:15px;
+    line-height:1.35;
+    position:relative;
+    color:var(--earth);
+  }
+  .guide .bubble::before{
+    content:""; position:absolute; left:-8px; top:14px;
+    border-width:8px 10px 8px 0; border-style:solid;
+    border-color:transparent var(--cream-deep) transparent transparent;
+  }
+
+  .word-display{
+    text-align:center; margin: 6px 0 18px;
+  }
+  .emoji-big{font-size:72px; line-height:1; display:block; margin-bottom:6px;}
+  .target-word{
+    font-family:'Baloo 2'; font-size:32px; font-weight:800; color:var(--sky-deep);
+    letter-spacing:.5px;
+  }
+  .target-sub{font-size:14px; font-weight:700; color:#9a8d7d; margin-top:2px;}
+
+  .speak-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--sky); color:#fff; border:none; border-radius:999px;
+    padding:10px 18px; font-weight:800; font-size:15px; cursor:pointer;
+    box-shadow: 0 5px 0 var(--sky-deep);
+    margin: 8px auto 0; display:flex; justify-content:center;
+  }
+  .speak-btn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--sky-deep);}
+
+  .options{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px;
+  }
+  .options.single-col{grid-template-columns:1fr;}
+  .opt-btn{
+    background:var(--cream-deep);
+    border:3px solid transparent;
+    border-radius:16px;
+    padding:14px 10px;
+    font-family:'Nunito'; font-weight:800; font-size:15px; color:var(--earth);
+    cursor:pointer;
+    box-shadow: 0 4px 0 #e3d3b3;
+    transition: all .12s ease;
+    min-height:52px;
+  }
+  .opt-btn .opt-emoji{font-size:26px; display:block; margin-bottom:4px;}
+  .opt-btn:active{transform:translateY(3px); box-shadow:0 1px 0 #e3d3b3;}
+  .opt-btn.correct{
+    background:#DFF3D8; border-color:var(--leaf); color:var(--leaf-deep); box-shadow:0 4px 0 var(--leaf-deep);
+  }
+  .opt-btn.wrong{
+    background:#FBDADA; border-color:#D9534F; color:#A33; box-shadow:0 4px 0 #c44944;
+    animation: shake .35s ease;
+  }
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .opt-btn:disabled{cursor:default;}
+
+  .feedback{
+    text-align:center; min-height:30px; margin-top:14px;
+    font-weight:800; font-size:15px;
+  }
+  .feedback.ok{color:var(--leaf-deep);}
+  .feedback.no{color:#c44944;}
+
+  .next-wrap{text-align:center; margin-top:6px;}
+  .next-btn{
+    background:var(--orange); color:#fff; border:none; border-radius:999px;
+    padding:13px 30px; font-weight:800; font-size:16px; cursor:pointer;
+    box-shadow: 0 5px 0 var(--orange-deep);
+    font-family:'Baloo 2';
+  }
+  .next-btn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--orange-deep);}
+  .next-btn:disabled{opacity:0; pointer-events:none;}
+
+  /* drag/order type */
+  .sentence-build{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    min-height:54px; background:var(--cream-deep); border-radius:14px; padding:12px;
+    margin-bottom:14px; border: 2px dashed #d9c7a3;
+  }
+  .word-bank{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;
+  }
+  .chip{
+    background:var(--sky); color:#fff; border:none; border-radius:10px;
+    padding:9px 14px; font-weight:800; font-size:14px; cursor:pointer;
+    box-shadow:0 3px 0 var(--sky-deep);
+    font-family:'Nunito';
+  }
+  .chip:active{transform:translateY(2px); box-shadow:0 1px 0 var(--sky-deep);}
+  .chip.placed{background:#cfcfcf; box-shadow:0 3px 0 #aaa; opacity:.5;}
+  .slot-chip{
+    background:var(--leaf); color:#fff; border:none; border-radius:10px;
+    padding:9px 14px; font-weight:800; font-size:14px; cursor:pointer;
+    box-shadow:0 3px 0 var(--leaf-deep); font-family:'Nunito';
+  }
+
+  /* matching pairs */
+  .match-grid{display:flex; gap:14px;}
+  .match-col{flex:1; display:flex; flex-direction:column; gap:8px;}
+  .match-item{
+    background:var(--cream-deep); border-radius:12px; padding:10px; text-align:center;
+    font-weight:800; font-size:14px; cursor:pointer; border:3px solid transparent;
+    box-shadow:0 3px 0 #e3d3b3;
+  }
+  .match-item.sel{border-color:var(--sky); background:#dff1f8;}
+  .match-item.matched{border-color:var(--leaf); background:#DFF3D8; cursor:default; opacity:.7;}
+  .match-item .me{font-size:22px; display:block;}
+
+  /* listening sequence */
+  .seq-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:14px 0;}
+  .seq-slot{
+    width:54px; height:54px; border-radius:12px; background:var(--cream-deep);
+    border:3px dashed #d9c7a3; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:20px; color:var(--earth);
+  }
+
+  /* badge popup */
+  #badgePopup{
+    position:fixed; inset:0; background:rgba(58,46,38,0.6); z-index:100;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  #badgePopup.show{display:flex;}
+  .badge-card{
+    background:var(--cream); border-radius:24px; padding:30px 24px; text-align:center;
+    max-width:340px; box-shadow:0 14px 0 rgba(0,0,0,.2);
+    animation: pop .4s ease;
+  }
+  .badge-card .big-emoji{font-size:80px; display:block; animation: spinPop .6s ease;}
+  @keyframes spinPop{from{transform:scale(0) rotate(-20deg);} to{transform:scale(1) rotate(0);}}
+  .badge-card h2{color:var(--earth); margin:8px 0 4px;}
+  .badge-card p{color:#7a6f64; font-weight:700; margin:0 0 16px;}
+  .badge-card .stars-earned{font-size:28px; margin-bottom:14px;}
+  .badge-card button{
+    background:var(--leaf); color:#fff; border:none; border-radius:999px;
+    padding:12px 28px; font-weight:800; font-size:16px; cursor:pointer;
+    box-shadow:0 5px 0 var(--leaf-deep); font-family:'Baloo 2';
+  }
+  .badge-card button:active{transform:translateY(4px); box-shadow:0 1px 0 var(--leaf-deep);}
+
+  .confetti{
+    position:fixed; top:-20px; z-index:101; pointer-events:none; font-size:24px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg); opacity:0.3;}}
+
+  footer{
+    text-align:center; padding:18px; font-size:12px; color:#9a8d7d; font-weight:700;
+  }
+
+  @media (max-width:380px){
+    .target-word{font-size:26px;}
+    .emoji-big{font-size:58px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important;}
+  }
+
+  :focus-visible{outline:3px solid var(--grape); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button id="homeBtn" title="Mapa" aria-label="Voltar ao mapa">🗺️</button>
+  <div class="pill">⭐ <span id="starCount">0</span></div>
+  <button id="soundToggle" title="Som" aria-label="Ligar/desligar som">🔊</button>
+</div>
+
+<!-- HOME / MAP SCREEN -->
+<div id="home" class="screen active">
+  <div class="hero">
+    <span class="roo">🦘</span>
+    <h1>A Viagem do Canguru</h1>
+    <p>Toque numa ilha para começar a aprender inglês!</p>
+  </div>
+
+  <div class="unit-divider"><span>🎒 Primeiros Passos</span></div>
+  <div class="trail" id="trailUnit0"></div>
+
+  <div class="unit-divider"><span>📘 Unidade 4 — Escola</span></div>
+  <div class="trail" id="trailUnit4"></div>
+
+  <div class="unit-divider"><span>📗 Unidade 5 — Antes e Agora</span></div>
+  <div class="trail" id="trailUnit5"></div>
+
+  <footer>Feito com carinho para você aprender no seu ritmo 💛</footer>
+</div>
+
+<!-- LESSON SCREEN -->
+<div id="lesson" class="screen">
+  <div class="lesson-header">
+    <h2 id="lessonTitle">Lição</h2>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+  <div id="cardArea"></div>
+</div>
+
+<!-- BADGE POPUP -->
+<div id="badgePopup">
+  <div class="badge-card">
+    <span class="big-emoji" id="badgeEmoji">🏅</span>
+    <h2 id="badgeTitle">Muito bem!</h2>
+    <p id="badgeSub">Você completou a ilha!</p>
+    <div class="stars-earned" id="badgeStars">⭐⭐⭐</div>
+    <button id="badgeContinue">Continuar</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   A VIAGEM DO CANGURU — motor do jogo
+   Conteúdo baseado no livro Unit 4 (School) e Unit 5 (Now/Then)
+   ========================================================= */
+
+/* ---------- estado ---------- */
+const STORAGE_KEY = 'canguru_progress_v1';
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { stars:0, completed:{}, soundOn:true };
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* ---------- audio (TTS) ---------- */
+let voices = [];
+function loadVoices(){ voices = speechSynthesis.getVoices(); }
+if('speechSynthesis' in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+function speak(text){
+  if(!state.soundOn) return;
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.82;
+  u.pitch = 1.05;
+  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.startsWith('en'));
+  if(enVoice) u.voice = enVoice;
+  speechSynthesis.speak(u);
+}
+function playDing(ok){
+  // simple beep via WebAudio, works without internet
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine';
+    if(ok){
+      o.frequency.setValueAtTime(523.25, ctx.currentTime);
+      o.frequency.setValueAtTime(659.25, ctx.currentTime+0.1);
+      o.frequency.setValueAtTime(783.99, ctx.currentTime+0.2);
+    } else {
+      o.frequency.setValueAtTime(220, ctx.currentTime);
+      o.frequency.setValueAtTime(180, ctx.currentTime+0.12);
+    }
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    o.start(); o.stop(ctx.currentTime+0.35);
+  }catch(e){}
+}
+
+/* =========================================================
+   CONTEÚDO DAS ILHAS
+   Cada island = { id, unit, title, sub, emoji, exercises:[...] }
+   Tipos de exercício: 'choice4img', 'choice2', 'listen', 'build', 'match', 'truefalse'
+   ========================================================= */
+
+const ISLANDS = [
+  // ---------------- UNIDADE 0: Primeiros Passos (alfabetização leve) ----------------
+  {
+    id:'u0_greet', unit:0, title:'Olá!', sub:'Cumprimentos básicos', emoji:'👋',
+    exercises:[
+      ex_listen('Hello!', '👋', 'Hello = Olá'),
+      ex_choice4img('Como se diz "Olá" em inglês?', [
+        {emoji:'👋', label:'Hello', correct:true},
+        {emoji:'🍎', label:'Apple', correct:false},
+        {emoji:'🐶', label:'Dog', correct:false},
+        {emoji:'📚', label:'Book', correct:false},
+      ]),
+      ex_listen('Yes', '✅', 'Yes = Sim'),
+      ex_listen('No', '❌', 'No = Não'),
+      ex_choice4img('Qual palavra significa "Sim"?', [
+        {emoji:'📝', label:'Yes', correct:true},
+        {emoji:'📝', label:'No', correct:false},
+        {emoji:'📝', label:'Hello', correct:false},
+        {emoji:'📝', label:'Please', correct:false},
+      ]),
+      ex_choice4img('Qual palavra significa "Não"?', [
+        {emoji:'📝', label:'Yes', correct:false},
+        {emoji:'📝', label:'No', correct:true},
+        {emoji:'📝', label:'Hello', correct:false},
+        {emoji:'📝', label:'Please', correct:false},
+      ]),
+    ]
+  },
+  {
+    id:'u0_numbers', unit:0, title:'Números', sub:'1 a 6', emoji:'🔢',
+    exercises:[
+      ex_listen('One', '1️⃣', 'One = Um'),
+      ex_listen('Two', '2️⃣', 'Two = Dois'),
+      ex_listen('Three', '3️⃣', 'Three = Três'),
+      ex_choice4img('Qual número é "Three"?', [
+        {emoji:'1️⃣', label:'One', correct:false},
+        {emoji:'2️⃣', label:'Two', correct:false},
+        {emoji:'3️⃣', label:'Three', correct:true},
+        {emoji:'4️⃣', label:'Four', correct:false},
+      ]),
+      ex_listen('Four', '4️⃣', 'Four = Quatro'),
+      ex_listen('Five', '5️⃣', 'Five = Cinco'),
+      ex_listen('Six', '6️⃣', 'Six = Seis'),
+      ex_choice4img('Qual número é "Five"?', [
+        {emoji:'3️⃣', label:'Three', correct:false},
+        {emoji:'5️⃣', label:'Five', correct:true},
+        {emoji:'6️⃣', label:'Six', correct:false},
+        {emoji:'4️⃣', label:'Four', correct:false},
+      ]),
+    ]
+  },
+
+  // ---------------- UNIDADE 4: SCHOOL ----------------
+  {
+    id:'u4_days', unit:4, title:'Dias da Semana', sub:'Monday a Friday', emoji:'📅',
+    exercises:[
+      ex_listen('Monday', '🗓️', 'Monday = Segunda-feira'),
+      ex_listen('Tuesday', '🗓️', 'Tuesday = Terça-feira'),
+      ex_listen('Wednesday', '🗓️', 'Wednesday = Quarta-feira'),
+      ex_listen('Thursday', '🗓️', 'Thursday = Quinta-feira'),
+      ex_listen('Friday', '🗓️', 'Friday = Sexta-feira'),
+      ex_choice4img('Qual é "Wednesday"?', [
+        {emoji:'🗓️', label:'Monday', correct:false},
+        {emoji:'🗓️', label:'Wednesday', correct:true},
+        {emoji:'🗓️', label:'Friday', correct:false},
+        {emoji:'🗓️', label:'Tuesday', correct:false},
+      ]),
+      ex_build('Hoje é quinta-feira. Monte a frase:', ['Today','is','Thursday'], 'Today is Thursday.'),
+      ex_choice4img('Qual dia vem depois de "Monday"?', [
+        {emoji:'🗓️', label:'Tuesday', correct:true},
+        {emoji:'🗓️', label:'Friday', correct:false},
+        {emoji:'🗓️', label:'Wednesday', correct:false},
+        {emoji:'🗓️', label:'Sunday', correct:false},
+      ]),
+    ]
+  },
+  {
+    id:'u4_subjects', unit:4, title:'Matérias da Escola', sub:'Math, English, Science...', emoji:'🎒',
+    exercises:[
+      ex_listen('Math', '🔢', 'Math = Matemática'),
+      ex_listen('English', '🔤', 'English = Inglês'),
+      ex_listen('Science', '🔬', 'Science = Ciências'),
+      ex_listen('History', '📜', 'History = História'),
+      ex_listen('Geography', '🌍', 'Geography = Geografia'),
+      ex_listen('Art', '🎨', 'Art = Artes'),
+      ex_listen('Music', '🎵', 'Music = Música'),
+      ex_listen('P.E.', '⚽', 'P.E. = Educação Física'),
+      ex_choice4img('Qual é "Science"?', [
+        {emoji:'🔬', label:'Science', correct:true},
+        {emoji:'🎨', label:'Art', correct:false},
+        {emoji:'🌍', label:'Geography', correct:false},
+        {emoji:'📜', label:'History', correct:false},
+      ]),
+      ex_choice4img('Qual é "Math"?', [
+        {emoji:'🎵', label:'Music', correct:false},
+        {emoji:'🔢', label:'Math', correct:true},
+        {emoji:'⚽', label:'P.E.', correct:false},
+        {emoji:'🔤', label:'English', correct:false},
+      ]),
+      ex_choice4img('Qual é "P.E." (Educação Física)?', [
+        {emoji:'⚽', label:'P.E.', correct:true},
+        {emoji:'🎨', label:'Art', correct:false},
+        {emoji:'🔬', label:'Science', correct:false},
+        {emoji:'🎵', label:'Music', correct:false},
+      ]),
+      ex_match('Ligue a matéria ao seu emoji', [
+        {a:'History', b:'📜'}, {a:'Music', b:'🎵'}, {a:'Art', b:'🎨'}, {a:'Geography', b:'🌍'}
+      ]),
+    ]
+  },
+  {
+    id:'u4_have', unit:4, title:'I have / She has', sub:'Hoje vs. Ontem', emoji:'📘',
+    exercises:[
+      ex_info('No presente, usamos "have" (eu/você/nós/eles) e "has" (ele/ela).', '📘',
+        'Today, I have math. She has PE.'),
+      ex_choice4img('Complete: "Today, I ___ math."', [
+        {emoji:'📝', label:'have', correct:true},
+        {emoji:'📝', label:'has', correct:false},
+        {emoji:'📝', label:'had', correct:false},
+        {emoji:'📝', label:'is', correct:false},
+      ]),
+      ex_choice4img('Complete: "Today, she ___ PE."', [
+        {emoji:'📝', label:'have', correct:false},
+        {emoji:'📝', label:'has', correct:true},
+        {emoji:'📝', label:'had', correct:false},
+        {emoji:'📝', label:'are', correct:false},
+      ]),
+      ex_info('No passado, usamos "had" para todos! (eu, você, ele, ela, nós, eles)', '⏳',
+        'Yesterday, I had history. He had English.'),
+      ex_choice4img('Complete: "Yesterday, I ___ history."', [
+        {emoji:'📝', label:'have', correct:false},
+        {emoji:'📝', label:'has', correct:false},
+        {emoji:'📝', label:'had', correct:true},
+        {emoji:'📝', label:'am', correct:false},
+      ]),
+      ex_choice4img('"Had" é usado para falar sobre...', [
+        {emoji:'📝', label:'o passado (ontem)', correct:true},
+        {emoji:'📝', label:'o presente (hoje)', correct:false},
+        {emoji:'📝', label:'o futuro (amanhã)', correct:false},
+        {emoji:'📝', label:'nenhum dos dois', correct:false},
+      ]),
+      ex_build('Monte: "Ela teve história ontem"', ['She','had','history','yesterday'], 'She had history yesterday.'),
+      ex_build('Monte: "Ela tem Educação Física hoje"', ['She','has','PE','today'], 'She has PE today.'),
+    ]
+  },
+  {
+    id:'u4_phonics', unit:4, title:'Sons: j, ge, dge', sub:'jacket, page, bridge', emoji:'🔤',
+    exercises:[
+      ex_listen('jacket', '🧥', 'jacket = jaqueta (som de "j")'),
+      ex_listen('juice', '🧃', 'juice = suco (som de "j")'),
+      ex_listen('page', '📄', 'page = página (som de "ge")'),
+      ex_listen('stage', '🎭', 'stage = palco (som de "ge")'),
+      ex_listen('bridge', '🌉', 'bridge = ponte (som de "dge")'),
+      ex_listen('edge', '📐', 'edge = borda (som de "dge")'),
+      ex_choice4img('Qual palavra termina com o som "dge"?', [
+        {emoji:'🌉', label:'bridge', correct:true},
+        {emoji:'📄', label:'page', correct:false},
+        {emoji:'🧃', label:'juice', correct:false},
+        {emoji:'🎭', label:'stage', correct:false},
+      ]),
+      ex_choice4img('Qual palavra começa com o som "j"?', [
+        {emoji:'🧥', label:'jacket', correct:true},
+        {emoji:'🌉', label:'bridge', correct:false},
+        {emoji:'📐', label:'edge', correct:false},
+        {emoji:'🎭', label:'stage', correct:false},
+      ]),
+    ]
+  },
+  {
+    id:'u4_ordinals', unit:4, title:'Números Ordinais', sub:'1st, 2nd, 3rd...', emoji:'🏆',
+    exercises:[
+      ex_listen('first', '🥇', 'first = primeiro (1st)'),
+      ex_listen('second', '🥈', 'second = segundo (2nd)'),
+      ex_listen('third', '🥉', 'third = terceiro (3rd)'),
+      ex_listen('fourth', '🏅', 'fourth = quarto (4th)'),
+      ex_listen('fifth', '🎖️', 'fifth = quinto (5th)'),
+      ex_choice4img('Como se diz "primeiro lugar" em inglês?', [
+        {emoji:'📝', label:'first', correct:true},
+        {emoji:'📝', label:'second', correct:false},
+        {emoji:'📝', label:'third', correct:false},
+        {emoji:'📝', label:'fourth', correct:false},
+      ]),
+      ex_choice4img('Como se diz "terceiro lugar" em inglês?', [
+        {emoji:'📝', label:'first', correct:false},
+        {emoji:'📝', label:'second', correct:false},
+        {emoji:'📝', label:'third', correct:true},
+        {emoji:'📝', label:'fifth', correct:false},
+      ]),
+      ex_build('Monte: "Morangos são os primeiros"', ['Strawberries','are','first'], 'Strawberries are first.'),
+    ]
+  },
+  {
+    id:'u4_breakfast', unit:4, title:'Did you have...?', sub:'Café da manhã ontem', emoji:'🥞',
+    exercises:[
+      ex_info('Para perguntar sobre o passado usamos "Did you...?" e respondemos "Yes, I did." ou "No, I didn\'t."', '❓',
+        'Did you have cereal yesterday? Yes, I did.'),
+      ex_listen('cereal', '🥣', 'cereal = cereal'),
+      ex_listen('pancakes', '🥞', 'pancakes = panquecas'),
+      ex_listen('sandwiches', '🥪', 'sandwiches = sanduíches'),
+      ex_listen('strawberries', '🍓', 'strawberries = morangos'),
+      ex_choice4img('Como se pergunta "Você tomou suco ontem?"', [
+        {emoji:'❓', label:'Did you have juice yesterday?', correct:true},
+        {emoji:'❓', label:'You have juice today?', correct:false},
+        {emoji:'❓', label:'Had you juice?', correct:false},
+        {emoji:'❓', label:'Do you juice?', correct:false},
+      ]),
+      ex_choice4img('Se a resposta é SIM, você responde:', [
+        {emoji:'📝', label:'Yes, I did.', correct:true},
+        {emoji:'📝', label:'No, I didn\'t.', correct:false},
+        {emoji:'📝', label:'Yes, I have.', correct:false},
+        {emoji:'📝', label:'I am yes.', correct:false},
+      ]),
+      ex_choice4img('Se a resposta é NÃO, você responde:', [
+        {emoji:'📝', label:'Yes, I did.', correct:false},
+        {emoji:'📝', label:'No, I didn\'t.', correct:true},
+        {emoji:'📝', label:'No, I have.', correct:false},
+        {emoji:'📝', label:'I not.', correct:false},
+      ]),
+      ex_build('Monte: "Eu tive morangos no café"', ['I','had','strawberries','for','breakfast'], 'I had strawberries for breakfast.'),
+    ]
+  },
+  {
+    id:'u4_sequence', unit:4, title:'Sequência da História', sub:'First, then, next...', emoji:'🔗',
+    exercises:[
+      ex_info('Usamos palavras de sequência para contar uma história em ordem: First, Then, Next, After that.', '🔗',
+        'First, I get up. Then I brush my teeth. Next, I get dressed. After that, I have breakfast.'),
+      ex_listen('First', '1️⃣', 'First = Primeiro'),
+      ex_listen('Then', '➡️', 'Then = Depois/Então'),
+      ex_listen('Next', '➡️', 'Next = Em seguida'),
+      ex_listen('After that', '➡️', 'After that = Depois disso'),
+      ex_choice4img('Qual palavra usamos para começar a história?', [
+        {emoji:'📝', label:'First', correct:true},
+        {emoji:'📝', label:'Then', correct:false},
+        {emoji:'📝', label:'Next', correct:false},
+        {emoji:'📝', label:'Last', correct:false},
+      ]),
+      ex_order('Coloque a rotina na ordem certa:', [
+        'First, I get up.',
+        'Then I brush my teeth.',
+        'Next, I get dressed.',
+        'After that, I have breakfast.'
+      ]),
+    ]
+  },
+
+  // ---------------- UNIDADE 5: NOW AND THEN ----------------
+  {
+    id:'u5_pastverbs', unit:5, title:'Verbos no Passado', sub:'lived, played, worked', emoji:'⏳',
+    exercises:[
+      ex_info('No passado, muitos verbos ganham "-ed" no final!', '⏳', 'live → lived   /   play → played   /   work → worked'),
+      ex_listen('lived', '🏠', 'lived = morou/vivia'),
+      ex_listen('played', '🎵', 'played = tocou/jogou'),
+      ex_listen('worked', '🚜', 'worked = trabalhou'),
+      ex_listen('listened', '🎧', 'listened = ouviu'),
+      ex_listen('talked', '💬', 'talked = conversou'),
+      ex_listen('cooked', '🍳', 'cooked = cozinhou'),
+      ex_listen('washed', '🧺', 'washed = lavou'),
+      ex_listen('watched', '📺', 'watched = assistiu'),
+      ex_choice4img('Qual é o passado de "live" (morar)?', [
+        {emoji:'🏠', label:'lived', correct:true},
+        {emoji:'🎵', label:'played', correct:false},
+        {emoji:'🚜', label:'worked', correct:false},
+        {emoji:'🍳', label:'cooked', correct:false},
+      ]),
+      ex_choice4img('Qual é o passado de "watch" (assistir)?', [
+        {emoji:'💬', label:'talked', correct:false},
+        {emoji:'📺', label:'watched', correct:true},
+        {emoji:'🧺', label:'washed', correct:false},
+        {emoji:'🎧', label:'listened', correct:false},
+      ]),
+      ex_build('Monte: "Ela morou numa casa velha"', ['She','lived','in','an','old','house'], 'She lived in an old house.'),
+      ex_build('Monte: "Ele trabalhou numa fazenda"', ['He','worked','on','a','farm'], 'He worked on a farm.'),
+    ]
+  },
+  {
+    id:'u5_nowago', unit:5, title:'Now / Ago', sub:'Agora e há tempos atrás', emoji:'🕰️',
+    exercises:[
+      ex_info('"Now" fala do presente. "Ago" fala de quanto tempo passou desde algo no passado.', '🕰️',
+        'Now, I live in Canada. Two years ago, I lived in the USA.'),
+      ex_choice4img('"Now" significa...', [
+        {emoji:'📝', label:'agora', correct:true},
+        {emoji:'📝', label:'há tempos', correct:false},
+        {emoji:'📝', label:'amanhã', correct:false},
+        {emoji:'📝', label:'nunca', correct:false},
+      ]),
+      ex_choice4img('"Ago" é usado para dizer...', [
+        {emoji:'📝', label:'o que está acontecendo agora', correct:false},
+        {emoji:'📝', label:'quanto tempo passou (ex: 2 anos atrás)', correct:true},
+        {emoji:'📝', label:'planos futuros', correct:false},
+        {emoji:'📝', label:'nenhuma das opções', correct:false},
+      ]),
+      ex_choice4img('"Five years ago" significa:', [
+        {emoji:'📝', label:'cinco anos atrás', correct:true},
+        {emoji:'📝', label:'em cinco anos', correct:false},
+        {emoji:'📝', label:'cinco anos agora', correct:false},
+        {emoji:'📝', label:'cinco dias atrás', correct:false},
+      ]),
+      ex_build('Monte: "Agora, eu moro no Canadá"', ['Now,','I','live','in','Canada'], 'Now, I live in Canada.'),
+      ex_build('Monte: "Dois anos atrás, eu morei nos EUA"', ['Two','years','ago,','I','lived','in','the','USA'], 'Two years ago, I lived in the USA.'),
+    ]
+  },
+  {
+    id:'u5_house', unit:5, title:'Coisas da Casa', sub:'fridge, laptop, sink...', emoji:'🏠',
+    exercises:[
+      ex_listen('fridge', '🧊', 'fridge = geladeira'),
+      ex_listen('laptop', '💻', 'laptop = notebook'),
+      ex_listen('microwave', '📻', 'microwave = micro-ondas'),
+      ex_listen('washing machine', '🌀', 'washing machine = máquina de lavar'),
+      ex_listen('bathtub', '🛁', 'bathtub = banheira'),
+      ex_listen('sink', '🚰', 'sink = pia'),
+      ex_choice4img('Qual é "fridge"?', [
+        {emoji:'🧊', label:'fridge', correct:true},
+        {emoji:'💻', label:'laptop', correct:false},
+        {emoji:'🛁', label:'bathtub', correct:false},
+        {emoji:'🚰', label:'sink', correct:false},
+      ]),
+      ex_choice4img('Qual é "washing machine"?', [
+        {emoji:'📻', label:'microwave', correct:false},
+        {emoji:'🌀', label:'washing machine', correct:true},
+        {emoji:'🧊', label:'fridge', correct:false},
+        {emoji:'💻', label:'laptop', correct:false},
+      ]),
+      ex_match('Ligue o objeto ao nome em inglês', [
+        {a:'sink', b:'🚰'}, {a:'bathtub', b:'🛁'}, {a:'laptop', b:'💻'}, {a:'microwave', b:'📻'}
+      ]),
+    ]
+  },
+  {
+    id:'u5_didnt', unit:5, title:'Did / Didn\'t', sub:'Perguntas no passado', emoji:'❔',
+    exercises:[
+      ex_info('Para perguntar no passado: "Did you...?" Para responder NÃO no passado: "I didn\'t..."', '❔',
+        'Did you cook dinner? No, I didn\'t. I didn\'t clean the kitchen.'),
+      ex_choice4img('Complete: "Did you cook dinner ___ night?"', [
+        {emoji:'📝', label:'last', correct:true},
+        {emoji:'📝', label:'next', correct:false},
+        {emoji:'📝', label:'now', correct:false},
+        {emoji:'📝', label:'today', correct:false},
+      ]),
+      ex_choice4img('Resposta correta para "No" no passado:', [
+        {emoji:'📝', label:'No, I didn\'t.', correct:true},
+        {emoji:'📝', label:'No, I not.', correct:false},
+        {emoji:'📝', label:'No, I don\'t.', correct:false},
+        {emoji:'📝', label:'No, I no.', correct:false},
+      ]),
+      ex_choice4img('"I didn\'t visit friends" significa:', [
+        {emoji:'📝', label:'Eu NÃO visitei amigos', correct:true},
+        {emoji:'📝', label:'Eu visitei amigos', correct:false},
+        {emoji:'📝', label:'Eu vou visitar amigos', correct:false},
+        {emoji:'📝', label:'Eu quero visitar amigos', correct:false},
+      ]),
+      ex_build('Monte: "Você assistiu TV ontem?"', ['Did','you','watch','TV','yesterday?'], 'Did you watch TV yesterday?'),
+      ex_build('Monte: "Eu não limpei a cozinha"', ['I','didn\'t','clean','the','kitchen'], 'I didn\'t clean the kitchen.'),
+    ]
+  },
+  {
+    id:'u5_phonics', unit:5, title:'Sons: pl, gl, fl, sl', sub:'play, glide, fly, slide', emoji:'❄️',
+    exercises:[
+      ex_listen('play', '🛝', 'play = brincar/jogar (som "pl")'),
+      ex_listen('glide', '🛷', 'glide = deslizar (som "gl")'),
+      ex_listen('fly', '🛩️', 'fly = voar (som "fl")'),
+      ex_listen('slide', '🧊', 'slide = escorregar (som "sl")'),
+      ex_listen('glove', '🧤', 'glove = luva (som "gl")'),
+      ex_listen('flower', '🌸', 'flower = flor (som "fl")'),
+      ex_choice4img('Qual palavra tem o som "sl"?', [
+        {emoji:'🧊', label:'slide', correct:true},
+        {emoji:'🧤', label:'glove', correct:false},
+        {emoji:'🌸', label:'flower', correct:false},
+        {emoji:'🛩️', label:'fly', correct:false},
+      ]),
+      ex_choice4img('Qual palavra tem o som "fl"?', [
+        {emoji:'🛷', label:'glide', correct:false},
+        {emoji:'🌸', label:'flower', correct:true},
+        {emoji:'🧊', label:'slide', correct:false},
+        {emoji:'🧤', label:'glove', correct:false},
+      ]),
+    ]
+  },
+  {
+    id:'u5_family', unit:5, title:'Valorizar os Avós', sub:'Family & memories', emoji:'👵',
+    exercises:[
+      ex_listen('grandma', '👵', 'grandma = vovó'),
+      ex_listen('grandpa', '👴', 'grandpa = vovô'),
+      ex_listen('remember', '💭', 'remember = lembrar'),
+      ex_listen('together', '🤝', 'together = juntos'),
+      ex_choice4img('Qual é "grandma"?', [
+        {emoji:'👵', label:'grandma', correct:true},
+        {emoji:'👴', label:'grandpa', correct:false},
+        {emoji:'👧', label:'sister', correct:false},
+        {emoji:'👦', label:'brother', correct:false},
+      ]),
+      ex_choice4img('"Eat together, laugh together" significa:', [
+        {emoji:'🍽️', label:'Comer juntos, rir juntos', correct:true},
+        {emoji:'🍽️', label:'Comer sozinho, rir sozinho', correct:false},
+        {emoji:'🍽️', label:'Não comer, não rir', correct:false},
+        {emoji:'🍽️', label:'Cozinhar separado', correct:false},
+      ]),
+      ex_build('Monte: "Vamos aprender e ensinar juntos"', ['Learn','with','them,','teach','them'], 'Learn with them, teach them.'),
+    ]
+  },
+];
+
+/* ---------- helpers de criação de exercício ---------- */
+function ex_listen(word, emoji, hint){
+  return { type:'listen', word, emoji, hint };
+}
+function ex_info(text, emoji, example){
+  return { type:'info', text, emoji, example };
+}
+function ex_choice4img(prompt, opts){
+  return { type:'choice', prompt, opts };
+}
+function ex_build(prompt, words, answer){
+  return { type:'build', prompt, words, answer };
+}
+function ex_order(prompt, sentencesInOrder){
+  return { type:'order', prompt, sentencesInOrder };
+}
+function ex_match(prompt, pairs){
+  return { type:'match', prompt, pairs };
+}
+
+/* =========================================================
+   RENDER: MAPA / HOME
+   ========================================================= */
+function islandUnlocked(island, idx, listOfThisUnit){
+  const posInUnit = listOfThisUnit.findIndex(i=>i.id===island.id);
+  if(posInUnit === 0) return true;
+  const prev = listOfThisUnit[posInUnit-1];
+  return !!state.completed[prev.id];
+}
+
+function renderHome(){
+  renderTrail('trailUnit0', ISLANDS.filter(i=>i.unit===0));
+  renderTrail('trailUnit4', ISLANDS.filter(i=>i.unit===4));
+  renderTrail('trailUnit5', ISLANDS.filter(i=>i.unit===5));
+  document.getElementById('starCount').textContent = state.stars;
+}
+
+function renderTrail(containerId, list){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  list.forEach((island, idx)=>{
+    const unlocked = islandUnlocked(island, idx, list);
+    const done = state.completed[island.id];
+    const div = document.createElement('div');
+    div.className = 'island';
+    const starsTxt = done ? '⭐'.repeat(done.stars) + '☆'.repeat(3-done.stars) : '';
+    div.innerHTML = `
+      <div class="island-badge ${unlocked?'':'locked'}" data-id="${island.id}" style="background:${unlocked ? (done? '#DFF3D8':'#FFE3C2') : '#cfc6ba'}">
+        ${unlocked ? island.emoji : '🔒'}
+      </div>
+      <div class="island-card">
+        <h3>${island.title}</h3>
+        <p>${island.sub}</p>
+        ${unlocked ? `<div class="stars">${starsTxt || 'Toque para começar'}</div>` : `<div class="lockmsg">Complete a ilha anterior</div>`}
+      </div>
+    `;
+    if(unlocked){
+      div.querySelector('.island-badge').addEventListener('click', ()=> startLesson(island.id));
+      div.querySelector('.island-card').addEventListener('click', ()=> startLesson(island.id));
+      div.style.cursor = 'pointer';
+    }
+    el.appendChild(div);
+  });
+}
+
+/* =========================================================
+   LESSON ENGINE
+   ========================================================= */
+let currentIslandId = null;
+let currentExIdx = 0;
+let currentCorrectCount = 0;
+let currentTotal = 0;
+
+function startLesson(islandId){
+  currentIslandId = islandId;
+  currentExIdx = 0;
+  currentCorrectCount = 0;
+  const island = ISLANDS.find(i=>i.id===islandId);
+  currentTotal = island.exercises.length;
+  document.getElementById('lessonTitle').textContent = island.emoji + ' ' + island.title;
+  showScreen('lesson');
+  renderExercise();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
+}
+
+function updateProgress(){
+  const pct = Math.round((currentExIdx / currentTotal) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function renderExercise(){
+  updateProgress();
+  const island = ISLANDS.find(i=>i.id===currentIslandId);
+  if(currentExIdx >= island.exercises.length){
+    finishIsland(island);
+    return;
+  }
+  const ex = island.exercises[currentExIdx];
+  const area = document.getElementById('cardArea');
+  area.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  if(ex.type === 'listen'){
+    card.innerHTML = renderListenCard(ex);
+  } else if(ex.type === 'info'){
+    card.innerHTML = renderInfoCard(ex);
+  } else if(ex.type === 'choice'){
+    card.innerHTML = renderChoiceCard(ex);
+  } else if(ex.type === 'build'){
+    card.innerHTML = renderBuildCard(ex);
+  } else if(ex.type === 'order'){
+    card.innerHTML = renderOrderCard(ex);
+  } else if(ex.type === 'match'){
+    card.innerHTML = renderMatchCard(ex);
+  }
+
+  area.appendChild(card);
+  wireExercise(ex, card);
+}
+
+/* ---- LISTEN card: shows word + speaker, must press play then continue ---- */
+function renderListenCard(ex){
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">Ouça e repita comigo!</div>
+    </div>
+    <div class="word-display">
+      <span class="emoji-big">${ex.emoji}</span>
+      <div class="target-word">${ex.word}</div>
+      <div class="target-sub">${ex.hint}</div>
+    </div>
+    <button class="speak-btn" id="playBtn">🔊 Ouvir</button>
+    <div class="feedback"></div>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn">Próximo →</button></div>
+  `;
+}
+function wireListen(ex, card){
+  const playBtn = card.querySelector('#playBtn');
+  const nextBtn = card.querySelector('#nextBtn');
+  const doSpeak = ()=> speak(ex.word);
+  playBtn.addEventListener('click', doSpeak);
+  setTimeout(doSpeak, 350);
+  nextBtn.addEventListener('click', ()=>{
+    currentCorrectCount++;
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+/* ---- INFO card: explains grammar, has example with audio ---- */
+function renderInfoCard(ex){
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">${ex.text}</div>
+    </div>
+    <div class="word-display">
+      <span class="emoji-big">${ex.emoji}</span>
+      <div class="target-sub" style="font-size:16px; color:var(--earth); font-weight:800;">${ex.example}</div>
+    </div>
+    <button class="speak-btn" id="playBtn">🔊 Ouvir exemplo</button>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn">Entendi! →</button></div>
+  `;
+}
+function wireInfo(ex, card){
+  const playBtn = card.querySelector('#playBtn');
+  const nextBtn = card.querySelector('#nextBtn');
+  playBtn.addEventListener('click', ()=> speak(ex.example));
+  nextBtn.addEventListener('click', ()=>{
+    currentCorrectCount++;
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+/* ---- CHOICE card: 4 options, pick correct one ---- */
+function renderChoiceCard(ex){
+  const optsHtml = ex.opts.map((o,i)=>`
+    <button class="opt-btn" data-idx="${i}" data-correct="${o.correct}">
+      <span class="opt-emoji">${o.emoji}</span>${o.label}
+    </button>
+  `).join('');
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">${ex.prompt}</div>
+    </div>
+    <div class="options">${optsHtml}</div>
+    <div class="feedback"></div>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn" disabled>Próximo →</button></div>
+  `;
+}
+function wireChoice(ex, card){
+  const btns = card.querySelectorAll('.opt-btn');
+  const feedback = card.querySelector('.feedback');
+  const nextBtn = card.querySelector('#nextBtn');
+  let answered = false;
+  btns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const correct = btn.dataset.correct === 'true';
+      btns.forEach(b=>{
+        b.disabled = true;
+        if(b.dataset.correct === 'true') b.classList.add('correct');
+      });
+      if(correct){
+        btn.classList.add('correct');
+        feedback.textContent = '✅ Muito bem!';
+        feedback.className = 'feedback ok';
+        playDing(true);
+        currentCorrectCount++;
+        speak(ex.opts.find(o=>o.correct).label);
+      } else {
+        btn.classList.add('wrong');
+        feedback.textContent = '❌ Quase! A resposta certa está em verde.';
+        feedback.className = 'feedback no';
+        playDing(false);
+      }
+      nextBtn.disabled = false;
+    });
+  });
+  nextBtn.addEventListener('click', ()=>{
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+/* ---- BUILD card: assemble sentence from word chips ---- */
+function renderBuildCard(ex){
+  const shuffled = [...ex.words].sort(()=>Math.random()-0.5);
+  const chipsHtml = shuffled.map((w,i)=>`<button class="chip" data-word="${escapeHtml(w)}">${w}</button>`).join('');
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">${ex.prompt}</div>
+    </div>
+    <div class="sentence-build" id="sentenceArea"></div>
+    <div class="word-bank" id="wordBank">${chipsHtml}</div>
+    <div class="feedback"></div>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn" disabled>Próximo →</button></div>
+  `;
+}
+function escapeHtml(s){ return s.replace(/"/g,'&quot;'); }
+function wireBuild(ex, card){
+  const sentenceArea = card.querySelector('#sentenceArea');
+  const wordBank = card.querySelector('#wordBank');
+  const feedback = card.querySelector('.feedback');
+  const nextBtn = card.querySelector('#nextBtn');
+  let placed = [];
+  let checked = false;
+
+  function syncSentence(){
+    sentenceArea.innerHTML = placed.map((w,i)=>`<button class="slot-chip" data-i="${i}">${w}</button>`).join('') || '<span style="color:#bbb;font-weight:700;">Toque nas palavras abaixo</span>';
+    sentenceArea.querySelectorAll('.slot-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        if(checked) return;
+        const i = parseInt(chip.dataset.i);
+        const word = placed[i];
+        placed.splice(i,1);
+        syncSentence();
+        const bankChip = [...wordBank.querySelectorAll('.chip')].find(c=>c.dataset.word===word && c.classList.contains('placed'));
+        if(bankChip) bankChip.classList.remove('placed');
+      });
+    });
+  }
+
+  wordBank.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      if(checked || chip.classList.contains('placed')) return;
+      placed.push(chip.dataset.word);
+      chip.classList.add('placed');
+      syncSentence();
+      if(placed.length === ex.words.length){
+        checkBuild();
+      }
+    });
+  });
+
+  function checkBuild(){
+    checked = true;
+    const userSentence = placed.join(' ');
+    const correct = normalize(userSentence) === normalize(ex.answer);
+    if(correct){
+      feedback.textContent = '✅ Perfeito! ' + ex.answer;
+      feedback.className = 'feedback ok';
+      playDing(true);
+      currentCorrectCount++;
+      speak(ex.answer);
+    } else {
+      feedback.innerHTML = '❌ Quase! A frase certa é:<br><b>' + ex.answer + '</b>';
+      feedback.className = 'feedback no';
+      playDing(false);
+      speak(ex.answer);
+    }
+    nextBtn.disabled = false;
+  }
+  function normalize(s){
+    return s.toLowerCase().replace(/[.,!?]/g,'').replace(/\s+/g,' ').trim();
+  }
+
+  syncSentence();
+  nextBtn.addEventListener('click', ()=>{
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+/* ---- ORDER card: tap sentences in correct order ---- */
+function renderOrderCard(ex){
+  const shuffled = [...ex.sentencesInOrder].sort(()=>Math.random()-0.5);
+  const chipsHtml = shuffled.map((s,i)=>`<button class="chip" style="display:block;width:100%;text-align:left;margin:4px 0;" data-text="${escapeHtml(s)}">${s}</button>`).join('');
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">${ex.prompt}</div>
+    </div>
+    <div class="sentence-build" id="sentenceArea" style="flex-direction:column; align-items:stretch;"></div>
+    <div class="word-bank" id="wordBank" style="flex-direction:column; align-items:stretch;">${chipsHtml}</div>
+    <div class="feedback"></div>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn" disabled>Próximo →</button></div>
+  `;
+}
+function wireOrder(ex, card){
+  const sentenceArea = card.querySelector('#sentenceArea');
+  const wordBank = card.querySelector('#wordBank');
+  const feedback = card.querySelector('.feedback');
+  const nextBtn = card.querySelector('#nextBtn');
+  let placed = [];
+  let checked = false;
+
+  function syncSentence(){
+    sentenceArea.innerHTML = placed.map((s,i)=>`<button class="slot-chip" style="display:block;width:100%;text-align:left;margin:4px 0;" data-i="${i}">${i+1}. ${s}</button>`).join('') || '<span style="color:#bbb;font-weight:700;">Toque na ordem certa</span>';
+    sentenceArea.querySelectorAll('.slot-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        if(checked) return;
+        const i = parseInt(chip.dataset.i);
+        const text = placed[i];
+        placed.splice(i,1);
+        syncSentence();
+        const bankChip = [...wordBank.querySelectorAll('.chip')].find(c=>c.dataset.text===text && c.classList.contains('placed'));
+        if(bankChip) bankChip.classList.remove('placed');
+      });
+    });
+  }
+
+  wordBank.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      if(checked || chip.classList.contains('placed')) return;
+      placed.push(chip.dataset.text);
+      chip.classList.add('placed');
+      syncSentence();
+      if(placed.length === ex.sentencesInOrder.length){
+        checkOrder();
+      }
+    });
+  });
+
+  function checkOrder(){
+    checked = true;
+    const correct = placed.every((s,i)=> s === ex.sentencesInOrder[i]);
+    if(correct){
+      feedback.textContent = '✅ Ordem perfeita!';
+      feedback.className = 'feedback ok';
+      playDing(true);
+      currentCorrectCount++;
+    } else {
+      feedback.innerHTML = '❌ A ordem certa é:<br>' + ex.sentencesInOrder.map((s,i)=>(i+1)+'. '+s).join('<br>');
+      feedback.className = 'feedback no';
+      playDing(false);
+    }
+    nextBtn.disabled = false;
+  }
+
+  syncSentence();
+  nextBtn.addEventListener('click', ()=>{
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+/* ---- MATCH card: tap pairs ---- */
+function renderMatchCard(ex){
+  const aItems = ex.pairs.map((p,i)=>({text:p.a, idx:i}));
+  const bItems = [...ex.pairs.map((p,i)=>({text:p.b, idx:i}))].sort(()=>Math.random()-0.5);
+  const aHtml = aItems.map(item=>`<div class="match-item" data-side="a" data-idx="${item.idx}">${item.text}</div>`).join('');
+  const bHtml = bItems.map(item=>`<div class="match-item" data-side="b" data-idx="${item.idx}"><span class="me">${item.text}</span></div>`).join('');
+  return `
+    <div class="guide">
+      <div class="roo-mini">🦘</div>
+      <div class="bubble">${ex.prompt}</div>
+    </div>
+    <div class="match-grid">
+      <div class="match-col" id="colA">${aHtml}</div>
+      <div class="match-col" id="colB">${bHtml}</div>
+    </div>
+    <div class="feedback"></div>
+    <div class="next-wrap"><button class="next-btn" id="nextBtn" disabled>Próximo →</button></div>
+  `;
+}
+function wireMatch(ex, card){
+  const feedback = card.querySelector('.feedback');
+  const nextBtn = card.querySelector('#nextBtn');
+  let selectedA = null;
+  let matchedCount = 0;
+  let wrongTries = 0;
+  const total = ex.pairs.length;
+
+  card.querySelectorAll('.match-item[data-side="a"]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.classList.contains('matched')) return;
+      card.querySelectorAll('.match-item[data-side="a"]').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');
+      selectedA = el;
+    });
+  });
+  card.querySelectorAll('.match-item[data-side="b"]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.classList.contains('matched') || !selectedA) return;
+      const idxA = selectedA.dataset.idx;
+      const idxB = el.dataset.idx;
+      if(idxA === idxB){
+        selectedA.classList.remove('sel');
+        selectedA.classList.add('matched');
+        el.classList.add('matched');
+        matchedCount++;
+        playDing(true);
+        selectedA = null;
+        if(matchedCount === total){
+          feedback.textContent = '✅ Todas certas!';
+          feedback.className = 'feedback ok';
+          currentCorrectCount++;
+          nextBtn.disabled = false;
+        }
+      } else {
+        el.classList.add('wrong');
+        wrongTries++;
+        playDing(false);
+        setTimeout(()=> el.classList.remove('wrong'), 350);
+      }
+    });
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    currentExIdx++;
+    renderExercise();
+  });
+}
+
+function wireExercise(ex, card){
+  if(ex.type==='listen') wireListen(ex, card);
+  else if(ex.type==='info') wireInfo(ex, card);
+  else if(ex.type==='choice') wireChoice(ex, card);
+  else if(ex.type==='build') wireBuild(ex, card);
+  else if(ex.type==='order') wireOrder(ex, card);
+  else if(ex.type==='match') wireMatch(ex, card);
+}
+
+/* =========================================================
+   FINISH ISLAND -> badge popup
+   ========================================================= */
+function finishIsland(island){
+  const ratio = currentCorrectCount / currentTotal;
+  let stars = 1;
+  if(ratio >= 0.9) stars = 3;
+  else if(ratio >= 0.65) stars = 2;
+
+  const prevStars = (state.completed[island.id] && state.completed[island.id].stars) || 0;
+  const newStars = Math.max(prevStars, stars);
+  const starsDelta = newStars - prevStars;
+
+  state.completed[island.id] = { stars:newStars };
+  state.stars += starsDelta;
+  saveState();
+
+  document.getElementById('badgeEmoji').textContent = stars===3 ? '🏆' : stars===2 ? '🏅' : '🎉';
+  document.getElementById('badgeTitle').textContent = stars===3 ? 'Incrível!' : stars===2 ? 'Muito bem!' : 'Você conseguiu!';
+  document.getElementById('badgeSub').textContent = `Você completou "${island.title}"!`;
+  document.getElementById('badgeStars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+  document.getElementById('badgePopup').classList.add('show');
+  launchConfetti();
+}
+
+function launchConfetti(){
+  const emojis = ['🎉','⭐','🎊','✨','🦘'];
+  for(let i=0;i<22;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.animationDuration = (1.6 + Math.random()*1.2) + 's';
+    c.style.fontSize = (16 + Math.random()*14) + 'px';
+    document.body.appendChild(c);
+    setTimeout(()=> c.remove(), 3000);
+  }
+}
+
+/* =========================================================
+   NAV / INIT
+   ========================================================= */
+document.getElementById('homeBtn').addEventListener('click', ()=>{
+  showScreen('home');
+  renderHome();
+});
+document.getElementById('soundToggle').addEventListener('click', function(){
+  state.soundOn = !state.soundOn;
+  this.textContent = state.soundOn ? '🔊' : '🔇';
+  saveState();
+});
+document.getElementById('badgeContinue').addEventListener('click', ()=>{
+  document.getElementById('badgePopup').classList.remove('show');
+  showScreen('home');
+  renderHome();
+});
+
+/* decorative clouds */
+function makeClouds(){
+  const wrap = document.createElement('div');
+  wrap.style.position='absolute'; wrap.style.top='0'; wrap.style.left='0';
+  wrap.style.width='100%'; wrap.style.height='280px'; wrap.style.overflow='hidden'; wrap.style.zIndex='-1'; wrap.style.pointerEvents='none';
+  document.body.prepend(wrap);
+  for(let i=0;i<4;i++){
+    const c = document.createElement('div');
+    c.className='cloud';
+    const size = 40 + Math.random()*40;
+    c.style.width = size+'px'; c.style.height = size*0.6+'px';
+    c.style.top = (10 + Math.random()*120)+'px';
+    c.style.left = (Math.random()*90)+'%';
+    wrap.appendChild(c);
+  }
+}
+makeClouds();
+
+/* init */
+state.soundOn = state.soundOn !== false;
+document.getElementById('soundToggle').textContent = state.soundOn ? '🔊' : '🔇';
+renderHome();
+</script>
+</body>
+</html>
