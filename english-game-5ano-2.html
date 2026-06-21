@@ -221,6 +221,7 @@
     min-height:52px;
   }
   .opt-btn .opt-emoji{font-size:26px; display:block; margin-bottom:4px;}
+  .opt-btn-number{font-size:32px; font-family:'Baloo 2'; font-weight:800; display:flex; align-items:center; justify-content:center; min-height:64px;}
   .opt-btn:active{transform:translateY(3px); box-shadow:0 1px 0 #e3d3b3;}
   .opt-btn.correct{
     background:#DFF3D8; border-color:var(--leaf); color:var(--leaf-deep); box-shadow:0 4px 0 var(--leaf-deep);
@@ -482,25 +483,25 @@ const ISLANDS = [
     ]
   },
   {
-    id:'u0_numbers', unit:0, title:'Números', sub:'1 a 6', emoji:'🔢',
+    id:'u0_numbers', unit:0, title:'Números Ordinais', sub:'first, second, third...', emoji:'🏅',
     exercises:[
-      ex_listen('One', '1️⃣', 'One = Um'),
-      ex_listen('Two', '2️⃣', 'Two = Dois'),
-      ex_listen('Three', '3️⃣', 'Three = Três'),
-      ex_choice4img('Qual número é "Three"?', [
-        {emoji:'1️⃣', label:'One', correct:false},
-        {emoji:'2️⃣', label:'Two', correct:false},
-        {emoji:'3️⃣', label:'Three', correct:true},
-        {emoji:'4️⃣', label:'Four', correct:false},
+      ex_listen('first', '🥇', 'first = primeiro (1st)'),
+      ex_listen('second', '🥈', 'second = segundo (2nd)'),
+      ex_listen('third', '🥉', 'third = terceiro (3rd)'),
+      ex_choice4img('Como se diz "primeiro" em inglês?', [
+        {emoji:'', label:'first', correct:true},
+        {emoji:'', label:'second', correct:false},
+        {emoji:'', label:'third', correct:false},
+        {emoji:'', label:'fourth', correct:false},
       ]),
-      ex_listen('Four', '4️⃣', 'Four = Quatro'),
-      ex_listen('Five', '5️⃣', 'Five = Cinco'),
-      ex_listen('Six', '6️⃣', 'Six = Seis'),
-      ex_choice4img('Qual número é "Five"?', [
-        {emoji:'3️⃣', label:'Three', correct:false},
-        {emoji:'5️⃣', label:'Five', correct:true},
-        {emoji:'6️⃣', label:'Six', correct:false},
-        {emoji:'4️⃣', label:'Four', correct:false},
+      ex_listen('fourth', '🏅', 'fourth = quarto (4th)'),
+      ex_listen('fifth', '🎖️', 'fifth = quinto (5th)'),
+      ex_listen('sixth', '🎗️', 'sixth = sexto (6th)'),
+      ex_choice4img('Como se diz "sexto" em inglês?', [
+        {emoji:'', label:'third', correct:false},
+        {emoji:'', label:'fifth', correct:false},
+        {emoji:'', label:'sixth', correct:true},
+        {emoji:'', label:'fourth', correct:false},
       ]),
     ]
   },
@@ -514,18 +515,18 @@ const ISLANDS = [
       ex_listen('Wednesday', '🗓️', 'Wednesday = Quarta-feira'),
       ex_listen('Thursday', '🗓️', 'Thursday = Quinta-feira'),
       ex_listen('Friday', '🗓️', 'Friday = Sexta-feira'),
-      ex_choice4img('Qual é "Wednesday"?', [
-        {emoji:'🗓️', label:'Monday', correct:false},
-        {emoji:'🗓️', label:'Wednesday', correct:true},
-        {emoji:'🗓️', label:'Friday', correct:false},
-        {emoji:'🗓️', label:'Tuesday', correct:false},
+      ex_choice4img('Como se diz "quarta-feira" em inglês?', [
+        {emoji:'📝', label:'Monday', correct:false},
+        {emoji:'📝', label:'Wednesday', correct:true},
+        {emoji:'📝', label:'Friday', correct:false},
+        {emoji:'📝', label:'Tuesday', correct:false},
       ]),
       ex_build('Hoje é quinta-feira. Monte a frase:', ['Today','is','Thursday'], 'Today is Thursday.'),
-      ex_choice4img('Qual dia vem depois de "Monday"?', [
-        {emoji:'🗓️', label:'Tuesday', correct:true},
-        {emoji:'🗓️', label:'Friday', correct:false},
-        {emoji:'🗓️', label:'Wednesday', correct:false},
-        {emoji:'🗓️', label:'Sunday', correct:false},
+      ex_choice4img('Qual dia vem logo depois de "Monday" na semana?', [
+        {emoji:'📝', label:'Tuesday', correct:true},
+        {emoji:'📝', label:'Friday', correct:false},
+        {emoji:'📝', label:'Wednesday', correct:false},
+        {emoji:'📝', label:'Sunday', correct:false},
       ]),
     ]
   },
@@ -540,19 +541,19 @@ const ISLANDS = [
       ex_listen('Art', '🎨', 'Art = Artes'),
       ex_listen('Music', '🎵', 'Music = Música'),
       ex_listen('P.E.', '⚽', 'P.E. = Educação Física'),
-      ex_choice4img('Qual é "Science"?', [
+      ex_choice4img('Como se diz "Ciências" em inglês?', [
         {emoji:'🔬', label:'Science', correct:true},
         {emoji:'🎨', label:'Art', correct:false},
         {emoji:'🌍', label:'Geography', correct:false},
         {emoji:'📜', label:'History', correct:false},
       ]),
-      ex_choice4img('Qual é "Math"?', [
+      ex_choice4img('Como se diz "Matemática" em inglês?', [
         {emoji:'🎵', label:'Music', correct:false},
         {emoji:'🔢', label:'Math', correct:true},
         {emoji:'⚽', label:'P.E.', correct:false},
         {emoji:'🔤', label:'English', correct:false},
       ]),
-      ex_choice4img('Qual é "P.E." (Educação Física)?', [
+      ex_choice4img('Como se diz "Educação Física" em inglês?', [
         {emoji:'⚽', label:'P.E.', correct:true},
         {emoji:'🎨', label:'Art', correct:false},
         {emoji:'🔬', label:'Science', correct:false},
@@ -763,13 +764,13 @@ const ISLANDS = [
       ex_listen('washing machine', '🌀', 'washing machine = máquina de lavar'),
       ex_listen('bathtub', '🛁', 'bathtub = banheira'),
       ex_listen('sink', '🚰', 'sink = pia'),
-      ex_choice4img('Qual é "fridge"?', [
+      ex_choice4img('Como se diz "geladeira" em inglês?', [
         {emoji:'🧊', label:'fridge', correct:true},
         {emoji:'💻', label:'laptop', correct:false},
         {emoji:'🛁', label:'bathtub', correct:false},
         {emoji:'🚰', label:'sink', correct:false},
       ]),
-      ex_choice4img('Qual é "washing machine"?', [
+      ex_choice4img('Como se diz "máquina de lavar" em inglês?', [
         {emoji:'📻', label:'microwave', correct:false},
         {emoji:'🌀', label:'washing machine', correct:true},
         {emoji:'🧊', label:'fridge', correct:false},
@@ -837,7 +838,7 @@ const ISLANDS = [
       ex_listen('grandpa', '👴', 'grandpa = vovô'),
       ex_listen('remember', '💭', 'remember = lembrar'),
       ex_listen('together', '🤝', 'together = juntos'),
-      ex_choice4img('Qual é "grandma"?', [
+      ex_choice4img('Como se diz "vovó" em inglês?', [
         {emoji:'👵', label:'grandma', correct:true},
         {emoji:'👴', label:'grandpa', correct:false},
         {emoji:'👧', label:'sister', correct:false},
@@ -1039,11 +1040,15 @@ function wireInfo(ex, card){
 
 /* ---- CHOICE card: 4 options, pick correct one ---- */
 function renderChoiceCard(ex){
-  const optsHtml = ex.opts.map((o,i)=>`
-    <button class="opt-btn" data-idx="${i}" data-correct="${o.correct}">
-      <span class="opt-emoji">${o.emoji}</span>${o.label}
+  const optsHtml = ex.opts.map((o,i)=>{
+    const emojiHtml = o.emoji ? `<span class="opt-emoji">${o.emoji}</span>` : '';
+    const bigNumber = o.emoji === '' ;
+    return `
+    <button class="opt-btn ${bigNumber ? 'opt-btn-number' : ''}" data-idx="${i}" data-correct="${o.correct}">
+      ${emojiHtml}${o.label}
     </button>
-  `).join('');
+  `;
+  }).join('');
   return `
     <div class="guide">
       <div class="roo-mini">🦘</div>
